@@ -353,93 +353,121 @@ body {
 .nh-stats { animation: nh-fadein 0.7s ease 0.3s both; }
 
 /* ── Responsive ── */
-/* On desktop nh-body is a 2-col grid; nh-adv must sit in the left column */
+
+/*
+ * Desktop: named grid areas so all nh-body children stack in the left column
+ * while nh-right spans all rows on the right.
+ * DOM order: nh-left → nh-right → nh-cta → nh-cards → nh-adv
+ * Grid areas place them: left/cta/cards/adv in col 1, right spans all rows.
+ */
 @media (min-width: 769px) {
   .nh-body {
+    grid-template-columns: 46% 54%;
     grid-template-areas:
-      "left right"
-      "adv  right";
-    grid-template-rows: 1fr auto;
+      "left  right"
+      "cta   right"
+      "cards right"
+      "adv   right";
+    grid-template-rows: auto auto auto 1fr;
+    align-items: start;
   }
-  .nh-left  { grid-area: left; }
+  .nh-left  { grid-area: left;  padding-bottom: 14px; }
   .nh-right { grid-area: right; }
-  .nh-adv   {
-    grid-area: adv;
-    padding: 0 40px 24px 48px;
-    align-self: start;
-  }
+  .nh-cta   { grid-area: cta;   align-self: start; margin: 0 40px 18px 48px; }
+  .nh-cards { grid-area: cards; margin: 0 40px 16px 48px;
+               display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+  .nh-adv   { grid-area: adv;   padding: 0 40px 24px 48px; }
 }
 
 @media (max-width: 1280px) {
-  .nh-left  { padding: 40px 32px 24px 40px; }
+  .nh-left  { padding: 36px 32px 14px 40px; }
+  .nh-cta   { margin: 0 32px 16px 40px; }
+  .nh-cards { margin: 0 32px 14px 40px; }
   .nh-adv   { padding: 0 32px 20px 40px; }
-  .nh-stats { margin: 12px 40px 24px; }
+  .nh-stats { margin: 10px 40px 24px; }
 }
 
 @media (max-width: 1024px) {
   .nh-section { min-height: auto; padding-top: 64px; }
-  /* Stack: left col → image → adv */
   .nh-body {
     grid-template-columns: 1fr;
-    grid-template-rows: auto;
     grid-template-areas:
       "left"
+      "cta"
+      "cards"
       "right"
       "adv";
+    grid-template-rows: auto;
   }
-  .nh-left  { padding: 32px 24px 24px; }
-  .nh-right { min-height: 340px; height: 52vw; }
-  .nh-adv   { padding: 16px 24px 20px; flex-wrap: wrap; gap: 10px; }
-  .nh-adv-item { flex: 1 1 calc(50% - 5px); }
+  .nh-left  { padding: 28px 24px 12px; }
+  .nh-right { height: 52vw; min-height: 300px; }
+  .nh-cta   { margin: 0 24px 16px; }
+  .nh-cards { margin: 0 24px 14px; grid-template-columns: repeat(4,1fr); }
+  .nh-adv   { padding: 14px 24px 18px;
+               display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .nh-adv-divider { display: none; }
   .nh-stats { margin: 10px 24px 20px; flex-wrap: wrap; }
   .nh-stat  { flex: 1 1 calc(50% - 8px); padding: 16px 18px; }
 }
 
+/*
+ * Mobile <=768px — visual-first order using flexbox:
+ * 1. nh-left  (label + headline + sub)     order:1
+ * 2. nh-right (hero image)                 order:2  ← immediate visual impact
+ * 3. nh-cta   (yellow CTA)                 order:3
+ * 4. nh-cards (feature cards 2-col)        order:4
+ * 5. nh-adv   (advantages 2-col)           order:5
+ * nh-stats sits outside nh-body — always at the bottom.
+ */
 @media (max-width: 768px) {
-  .nh-left    { padding: 20px 16px 16px; }
-  .nh-headline { font-size: clamp(24px, 7vw, 36px); }
-  .nh-sub     { font-size: 14px; }
-  .nh-cards   { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .nh-body { display: flex; flex-direction: column; }
 
-  /* Image: immediately after CTA, full width, fixed height */
+  .nh-left  { order: 1; padding: 18px 16px 10px; }
+  .nh-right { order: 2; }
+  .nh-cta   { order: 3; margin: 14px 16px 0; width: calc(100% - 32px);
+               display: flex; justify-content: center; }
+  .nh-cards { order: 4; margin: 12px 16px 0;
+               display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .nh-adv   { order: 5; padding: 12px 16px 14px;
+               display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Headline tighter to reduce text wall before the image */
+  .nh-headline { font-size: clamp(22px, 6.5vw, 32px); margin-bottom: 8px; }
+  .nh-sub      { font-size: 13px; line-height: 1.5; margin-bottom: 0; }
+
+  /* Hero image — full width, fixed height, centred on printer */
   .nh-right {
-    height: 300px;
-    min-height: 260px;
     width: 100%;
-    position: relative;   /* override the desktop "fill parent" positioning */
+    height: 290px;
+    min-height: 240px;
+    position: relative;
     flex-shrink: 0;
   }
+  /* No left-fade on mobile — image is full-width so it's not needed */
+  .nh-right-fade { display: none; }
 
-  /* Advantages: below image, 2-column compact */
-  .nh-adv {
-    padding: 14px 16px 16px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    align-items: start;
-  }
-  .nh-adv-item  { flex: none; }
+  /* Advantages */
+  .nh-adv-item    { flex: none; }
   .nh-adv-divider { display: none; }
-  .nh-adv-text  { font-size: 11px; }
+  .nh-adv-text    { font-size: 11px; }
+  .nh-adv-item svg { width: 16px; height: 16px; }
 
-  /* Stats bar: 2-column grid, no horizontal overflow */
+  /* Cards */
+  .nh-card { padding: 14px 12px; border-radius: 12px; }
+
+  /* Stats — 2-col grid, no overflow */
   .nh-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1px;
-    margin: 0 16px 16px;
+    margin: 12px 16px 16px;
     padding: 0;
     border-radius: 10px;
-    overflow: hidden;     /* clip dividers cleanly */
+    overflow: hidden;
+    background: rgba(244,247,250,0.06);
   }
-  .nh-stat {
-    padding: 14px 14px;
-    gap: 10px;
-    /* Remove flex:1 so grid controls sizing */
-    flex: none;
-  }
-  /* Hide the inline span dividers — grid gap handles spacing */
+  .nh-stat         { padding: 14px 14px; gap: 10px; flex: none;
+                      background: rgba(3,18,36,0.80); }
   .nh-stat-divider { display: none; }
   .nh-stat-value   { font-size: 18px; }
   .nh-stat-label   { font-size: 11px; }
@@ -448,14 +476,15 @@ body {
 }
 
 @media (max-width: 480px) {
-  .nh-left    { padding: 18px 14px 14px; }
-  .nh-headline { font-size: 24px; }
-  .nh-cards   { gap: 6px; }
-  .nh-card    { padding: 12px 10px; border-radius: 12px; }
-  .nh-cta     { font-size: 14px; padding: 12px 20px; }
-  .nh-right   { height: 260px; }
-  .nh-adv     { grid-template-columns: 1fr 1fr; padding: 12px 14px 14px; gap: 10px; }
-  .nh-stats   { grid-template-columns: 1fr 1fr; margin: 0 14px 14px; }
+  .nh-left    { padding: 14px 14px 8px; }
+  .nh-headline { font-size: 22px; }
+  .nh-right   { height: 250px; min-height: 200px; }
+  .nh-cta     { margin: 12px 14px 0; width: calc(100% - 28px);
+                 font-size: 14px; padding: 12px 20px; }
+  .nh-cards   { margin: 10px 14px 0; gap: 6px; }
+  .nh-card    { padding: 12px 10px; }
+  .nh-adv     { padding: 10px 14px 12px; gap: 8px; }
+  .nh-stats   { margin: 10px 14px 14px; }
   .nh-stat    { padding: 12px 12px; gap: 8px; }
   .nh-stat-value { font-size: 16px; }
 }

@@ -161,10 +161,8 @@ export function HeroSection() {
       {/* ── Two-column hero body ─────────────────────────────────────────── */}
       <div className="nh-body">
 
-        {/* LEFT COLUMN */}
+        {/* LEFT: label + headline + subtitle only */}
         <div className="nh-left">
-
-          {/* Arrow label */}
           <div className="nh-label-row">
             <svg width="18" height="10" viewBox="0 0 18 10" fill="none" aria-hidden="true" className="nh-label-arrow">
               <path d="M1 5H15M15 5L11 1M15 5L11 9" stroke="#F5C400" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -172,61 +170,58 @@ export function HeroSection() {
             <span className="nh-label">Професійний FDM 3D Друк</span>
           </div>
 
-          {/* Headline */}
           <h1 className="nh-headline">
             Малосерійне<br />
             виробництво<br />
             пластикових деталей
           </h1>
 
-          {/* Sub */}
           <p className="nh-sub">
             Від прототипу до серії. Швидко, точно, надійно.<br />
             Сучасне обладнання та інженерні матеріали<br />
             для ваших ідей та виробництва.
           </p>
-
-          {/* Feature cards — single horizontal row */}
-          <div className="nh-cards" role="list">
-            {FEATURE_CARDS.map((card, i) => (
-              <div key={i} className="nh-card" role="listitem">
-                <card.Icon />
-                <p className="nh-card-line1">{card.line1}</p>
-                <p className="nh-card-line2">{card.line2}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* CTA */}
-          <a
-            href="#contacts"
-            onClick={handleCtaClick}
-            className="nh-cta"
-            aria-label="Зв'язатися з нами — перейти до контактів"
-          >
-            Зв&apos;язатися з нами
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-              <path d="M3 9H15M15 9L10 4M15 9L10 14"
-                stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </a>
         </div>
 
-        {/* RIGHT COLUMN — single composite image */}
+        {/* IMAGE — right column on desktop, moves above CTA on mobile */}
         <div className="nh-right" aria-hidden="true">
           <Image
             src="/hero-visual.png"
             alt="Bambu Lab P1S 3D принтер з пластиковими деталями"
             fill
             priority
-            sizes="(max-width: 1024px) 100vw, 54vw"
+            sizes="(max-width: 768px) 100vw, 54vw"
             style={{ objectFit: "cover", objectPosition: "center right" }}
           />
-          {/* Left-edge gradient so left column text stays readable */}
           <div className="nh-right-fade" aria-hidden="true" />
         </div>
 
-        {/* Advantages — inside nh-body so it can be reordered on mobile below the image */}
+        {/* CTA — left col on desktop, just below image on mobile */}
+        <a
+          href="#contacts"
+          onClick={handleCtaClick}
+          className="nh-cta"
+          aria-label="Зв'язатися з нами — перейти до контактів"
+        >
+          Зв&apos;язатися з нами
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M3 9H15M15 9L10 4M15 9L10 14"
+              stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </a>
+
+        {/* FEATURE CARDS — left col on desktop, below CTA on mobile */}
+        <div className="nh-cards" role="list">
+          {FEATURE_CARDS.map((card, i) => (
+            <div key={i} className="nh-card" role="listitem">
+              <card.Icon />
+              <p className="nh-card-line1">{card.line1}</p>
+              <p className="nh-card-line2">{card.line2}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* ADVANTAGES — left col on desktop, below cards on mobile */}
         <div className="nh-adv" role="list" aria-label="Наші переваги">
           {ADVANTAGES.map((adv, i) => (
             <div key={i} className="nh-adv-item" role="listitem">
