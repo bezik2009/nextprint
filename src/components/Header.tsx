@@ -42,9 +42,9 @@ export function Header() {
         <Image
           src="/logo.png"
           alt="NEXT PRINT"
-          height={56}
-          width={210}
-          style={{ height: 56, width: "auto" }}
+          height={68}
+          width={255}
+          style={{ height: 68, width: "auto" }}
           priority
         />
       </Link>
