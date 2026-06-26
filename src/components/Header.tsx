@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback } from "react";
 import { MobileNav } from "@/components/MobileNav";
 import { NavLinks } from "@/components/NavLinks";
@@ -32,7 +33,7 @@ export function Header() {
     <header className="np-header">
 
       {/* Zone 1 — Logo → scroll to top */}
-      <a
+      <Link
         href="/"
         onClick={handleLogoClick}
         className="np-header-logo"
@@ -46,7 +47,7 @@ export function Header() {
           style={{ height: 56, width: "auto" }}
           priority
         />
-      </a>
+      </Link>
 
       {/* Zone 2 — Spacer */}
       <div className="np-header-spacer" aria-hidden="true" />

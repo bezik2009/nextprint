@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { siteConfig } from "@/lib/siteConfig";
 
 /* ── Shared hex icon wrapper (same pattern as all other sections) ────────── */
@@ -123,7 +124,7 @@ export function ContactsSection() {
               <span className="nc-label-line" aria-hidden="true" />
               <p className="nc-label">Контакти</p>
             </div>
-            <h2 className="nc-heading">Зв'яжіться з нами</h2>
+            <h2 className="nc-heading">Зв&apos;яжіться з нами</h2>
             <p className="nc-sub">
               Готові обговорити ваш проєкт<br />
               та запропонувати найкраще рішення.
@@ -172,7 +173,7 @@ export function ContactsSection() {
 
           {/* Col 1 — logo + tagline */}
           <div className="nc-footer-col">
-            <a href="/" aria-label="NEXT PRINT — на головну" className="nc-footer-logo-link">
+            <Link href="/" aria-label="NEXT PRINT — на головну" className="nc-footer-logo-link">
               {/*
                * /public/logo-footer.png — place your footer logo here.
                * Recommended: white/light version, transparent bg, ~280px wide.
@@ -184,7 +185,7 @@ export function ContactsSection() {
                 height={72}
                 style={{ width: 280, height: "auto" }}
               />
-            </a>
+            </Link>
             <p className="nc-footer-tagline" style={{ marginTop: 20 }}>
               Професійний 3D-друк деталей<br />
               будь-якої складності для бізнесу<br />
