@@ -1837,3 +1837,281 @@ a.nc-footer-link:hover { color: #F4F7FA; }
   .priv-title     { font-size: 28px; }
   .priv-section-title { font-size: 15px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PORTFOLIO GALLERY SECTION — compact premium asymmetric layout
+   Desktop grid (4 col × 3 row, fixed row heights):
+     Row 1 (260px): featured(c1-2) featured(c1-2)  02(c3)    03(c4)
+     Row 2 (260px): featured(c1-2) featured(c1-2)  04(c3)    05(c4)
+     Row 3 (200px): 06(c1)         07(c2)           08(c3)    CTA(c4)
+   Total grid height: 260+12+260+12+200 = 744px
+   Section total ≈ 56+28+110+28+744+48 ≈ 1014px — fits 13" MacBook at 900vh
+═══════════════════════════════════════════════════════════════════════════ */
+
+.pg-section {
+  background: #020B16;
+  padding: 44px 48px 36px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.pg-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 20px;
+}
+.pg-header-left { flex: 1; }
+
+.pg-label-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.pg-label-line {
+  width: 28px; height: 2px;
+  background: #F5C400;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+.pg-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #F5C400;
+}
+.pg-heading {
+  font-size: clamp(22px, 2.4vw, 34px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: #F4F7FA;
+  margin-bottom: 0;
+}
+.pg-heading-accent { color: #F5C400; }
+.pg-sub {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: rgba(244,247,250,0.50);
+  max-width: 420px;
+  flex-shrink: 0;
+  align-self: flex-end;
+  text-align: right;
+}
+
+/* ── Grid ────────────────────────────────────────────────────────────────── */
+.pg-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 220px 220px 170px;
+  gap: 10px;
+}
+
+/* ── Base card ───────────────────────────────────────────────────────────── */
+.pg-card {
+  background: rgba(3,20,38,0.70);
+  border: 1px solid rgba(244,247,250,0.10);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: default;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.22s;
+}
+.pg-card:hover {
+  border-color: rgba(245,196,0,0.35);
+  box-shadow: 0 0 24px rgba(245,196,0,0.07);
+  transform: translateY(-3px);
+}
+
+/* Featured: col 1-2 spanning rows 1-2 */
+.pg-card--featured {
+  grid-column: 1 / 3;
+  grid-row: 1 / 3;
+}
+
+/* Image wrapper fills remaining height */
+.pg-img-wrap {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background: rgba(6,27,46,0.90);
+  min-height: 0;
+}
+.pg-img {
+  transition: transform 0.4s ease;
+}
+.pg-card:hover .pg-img { transform: scale(1.04); }
+
+/* Dark bottom gradient — text legibility + premium look */
+.pg-img-fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(2,11,22,0.75) 0%,
+    rgba(2,11,22,0.20) 35%,
+    transparent 60%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Material badge */
+.pg-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 2;
+  padding: 3px 9px;
+  background: #F5C400;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: #020B16;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* Card body — compact */
+.pg-card-body {
+  padding: 10px 14px 12px;
+  flex-shrink: 0;
+}
+.pg-card-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #F4F7FA;
+  line-height: 1.3;
+}
+/* Description only shown on featured card */
+.pg-card-desc {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: rgba(244,247,250,0.50);
+  margin-top: 3px;
+}
+/* Featured gets slightly larger text */
+.pg-card--featured .pg-card-label { font-size: 16px; }
+.pg-card--featured .pg-card-body  { padding: 14px 18px 16px; }
+
+/* ── CTA tile — no image, col 4 row 3 ───────────────────────────────────── */
+.pg-cta-tile {
+  grid-column: 4 / 5;
+  grid-row: 3 / 4;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  padding: 22px 20px;
+  background: rgba(3,20,38,0.85);
+  border: 1px solid rgba(244,247,250,0.14);
+  border-radius: 10px;
+  text-decoration: none;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.pg-cta-tile:hover {
+  border-color: rgba(245,196,0,0.50);
+  box-shadow: 0 0 28px rgba(245,196,0,0.10);
+}
+
+/* Yellow radial glow */
+.pg-cta-glow {
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 160px; height: 160px;
+  background: radial-gradient(ellipse, rgba(245,196,0,0.14) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.pg-cta-icon { flex-shrink: 0; }
+
+.pg-cta-title {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #F4F7FA;
+}
+.pg-cta-body {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: rgba(244,247,250,0.50);
+}
+.pg-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #F5C400;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #020B16;
+  align-self: flex-start;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.pg-cta-tile:hover .pg-cta-btn { background: #ffd11a; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 1280px) {
+  .pg-section { padding: 40px 40px 32px; }
+  .pg-grid { grid-template-rows: 210px 210px 160px; gap: 10px; }
+}
+
+@media (max-width: 1024px) {
+  .pg-section { padding: 52px 32px 44px; }
+  /* Tablet: 2-col, featured spans full width, rows auto */
+  .pg-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .pg-sub { text-align: left; max-width: 100%; }
+  .pg-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 280px repeat(3, 200px) 180px;
+    gap: 10px;
+  }
+  .pg-card--featured { grid-column: 1 / 3; grid-row: 1 / 2; }
+  .pg-cta-tile       { grid-column: 1 / 3; grid-row: auto;
+                        flex-direction: row; align-items: center;
+                        gap: 16px; padding: 20px 24px; }
+  .pg-cta-glow { display: none; }
+  .pg-cta-body { font-size: 13px; }
+}
+
+@media (max-width: 768px) {
+  .pg-section { padding: 44px 20px 40px; }
+  .pg-heading { font-size: clamp(22px, 6vw, 32px); }
+  .pg-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 240px repeat(3, 180px) auto;
+    gap: 8px;
+  }
+  .pg-card--featured { grid-column: 1 / 3; grid-row: 1 / 2; }
+  .pg-card-label { font-size: 12px; }
+  .pg-card--featured .pg-card-label { font-size: 14px; }
+  .pg-card-body  { padding: 8px 12px 10px; }
+  .pg-badge      { font-size: 9px; padding: 2px 7px; bottom: 8px; left: 8px; }
+  .pg-cta-tile   { grid-column: 1 / 3; grid-row: auto;
+                    flex-direction: column; align-items: flex-start;
+                    padding: 18px 16px; gap: 8px; }
+}
+
+@media (max-width: 480px) {
+  .pg-section { padding: 40px 14px 36px; }
+  .pg-grid    { gap: 8px; grid-template-rows: 220px repeat(3, 160px) auto; }
+  .pg-card--featured .pg-card-body { padding: 10px 12px 12px; }
+  .pg-cta-title  { font-size: 13px; }
+  .pg-cta-body   { font-size: 11px; }
+  .pg-cta-btn    { font-size: 11px; padding: 7px 12px; }
+}
+

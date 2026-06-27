@@ -3,6 +3,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { AboutSection } from "@/components/AboutSection";
 import { CapabilitiesSection } from "@/components/CapabilitiesSection";
 import { ProcessSection } from "@/components/ProcessSection";
+import { PortfolioGallery } from "@/components/PortfolioGallery";
 import { ContactsSection } from "@/components/ContactsSection";
 
 export default function HomePage() {
@@ -14,6 +15,7 @@ export default function HomePage() {
         <AboutSection />
         <CapabilitiesSection />
         <ProcessSection />
+        <PortfolioGallery />
       </main>
       <ContactsSection />
     </>
