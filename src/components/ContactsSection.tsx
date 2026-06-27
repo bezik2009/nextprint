@@ -204,18 +204,7 @@ export function ContactsSection() {
             </ul>
           </div>
 
-          {/* Col 3 — capabilities */}
-          <div className="nc-footer-col">
-            <p className="nc-footer-col-title">Можливості</p>
-            <ul className="nc-footer-list">
-              <li><span className="nc-footer-link">FDM друк</span></li>
-              <li><span className="nc-footer-link">Матеріали</span></li>
-              <li><span className="nc-footer-link">Обладнання</span></li>
-              <li><span className="nc-footer-link">Постобробка</span></li>
-            </ul>
-          </div>
-
-          {/* Col 4 — contacts */}
+          {/* Col 3 — contacts */}
           <div className="nc-footer-col">
             <p className="nc-footer-col-title">Контакти</p>
             <ul className="nc-footer-list">
