@@ -183,7 +183,13 @@ export function ContactsSection() {
                 alt="NEXT PRINT"
                 width={280}
                 height={72}
-                style={{ width: 280, height: "auto" }}
+                style={{
+                  width: "auto",
+                  height: "auto",
+                  maxWidth: 260,
+                  objectFit: "contain",
+                  display: "block",
+                }}
               />
             </Link>
             <p className="nc-footer-tagline" style={{ marginTop: 20 }}>

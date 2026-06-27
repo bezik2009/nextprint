@@ -5,6 +5,7 @@ import { CapabilitiesSection } from "@/components/CapabilitiesSection";
 import { ProcessSection } from "@/components/ProcessSection";
 import { PortfolioGallery } from "@/components/PortfolioGallery";
 import { TrustBlock } from "@/components/TrustBlock";
+import { FAQSection } from "@/components/FAQSection";
 import { ContactsSection } from "@/components/ContactsSection";
 
 export default function HomePage() {
@@ -18,6 +19,7 @@ export default function HomePage() {
         <ProcessSection />
         <PortfolioGallery />
         <TrustBlock />
+        <FAQSection />
       </main>
       <ContactsSection />
     </>

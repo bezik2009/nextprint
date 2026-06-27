@@ -2311,7 +2311,7 @@ a.nc-footer-link:hover { color: #F4F7FA; }
   .nc-footer-list { gap: 6px; }
   .nc-footer-link { font-size: 12px; }
   .nc-footer-tagline { font-size: 11px; }
-  .nc-footer-logo-link img { height: 28px !important; }
+  .nc-footer-logo-link img { max-width: 180px; height: auto; }
 }
 
 @media (max-width: 480px) {
@@ -2335,4 +2335,158 @@ a.nc-footer-link:hover { color: #F4F7FA; }
   .nc-footer { padding: 18px 14px 0; }
   .nc-footer-grid { gap: 14px; }
   .nc-footer-bar  { padding: 12px 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FAQ SECTION  — faq-* classes
+   Desktop: 2-column grid (items 1-6) + full-width row (item 7)
+   Mobile:  single-column accordion
+═══════════════════════════════════════════════════════════════════════════ */
+
+.faq-section {
+  background: #020B16;
+  padding: 56px 48px 60px;
+  border-top: 1px solid rgba(244,247,250,0.07);
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.faq-header {
+  margin-bottom: 32px;
+}
+
+.faq-label-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.faq-label-line {
+  width: 28px; height: 2px;
+  background: #F5C400;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+.faq-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #F5C400;
+}
+.faq-heading {
+  font-size: clamp(24px, 2.8vw, 38px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: #F4F7FA;
+}
+
+/* ── 2-col grid ──────────────────────────────────────────────────────────── */
+.faq-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* Full-width row */
+.faq-wide-row {
+  width: 100%;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────────── */
+.faq-card {
+  background: rgba(3,20,38,0.65);
+  border: 1px solid rgba(244,247,250,0.10);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.faq-card:hover {
+  border-color: rgba(244,247,250,0.18);
+}
+.faq-card--open {
+  border-color: rgba(245,196,0,0.25);
+}
+.faq-card--open:hover {
+  border-color: rgba(245,196,0,0.35);
+}
+
+/* ── Trigger (button) ────────────────────────────────────────────────────── */
+.faq-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: "Manrope", system-ui, sans-serif;
+}
+
+.faq-question {
+  font-size: 16px;
+  font-weight: 700;
+  color: #F4F7FA;
+  line-height: 1.35;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Chevron is styled inline via FAQCard component */
+
+/* ── Answer panel ────────────────────────────────────────────────────────── */
+/*
+ * Height animation via max-height + opacity.
+ * max-height: 0 → collapsed, 999px → expanded.
+ * Overflow hidden clips content during transition.
+ */
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    max-height 280ms ease,
+    opacity 220ms ease;
+}
+.faq-answer--open {
+  max-height: 400px;
+  opacity: 1;
+}
+
+.faq-answer-text {
+  padding: 0 20px 20px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.65;
+  color: rgba(244,247,250,0.55);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .faq-section { padding: 48px 32px 52px; }
+  .faq-grid { gap: 8px; }
+  .faq-question { font-size: 15px; }
+}
+
+@media (max-width: 768px) {
+  .faq-section { padding: 32px 20px 36px; }
+  .faq-header  { margin-bottom: 20px; }
+  .faq-heading { font-size: clamp(20px, 5.5vw, 28px); }
+  /* Single column on mobile */
+  .faq-grid { grid-template-columns: 1fr; gap: 6px; margin-bottom: 6px; }
+  .faq-trigger { padding: 16px 16px; }
+  .faq-question { font-size: 15px; }
+  .faq-answer-text { font-size: 13px; padding: 0 16px 16px; }
+}
+
+@media (max-width: 480px) {
+  .faq-section { padding: 26px 16px 30px; }
+  .faq-grid { gap: 5px; margin-bottom: 5px; }
+  .faq-trigger { padding: 14px 14px; }
+  .faq-question { font-size: 14px; }
+  .faq-answer-text { font-size: 13px; padding: 0 14px 14px; }
 }
