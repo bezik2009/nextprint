@@ -112,7 +112,7 @@ function FAQCard({
 ═══════════════════════════════════════════════════════════════════════════ */
 export function FAQSection() {
   // First item open by default
-  const [openIndex, setOpenIndex] = useState<number>(0);
+  const [openIndex, setOpenIndex] = useState<number>(FAQ_ITEMS.length - 1);
   const uid = useId();
 
   const toggle = (i: number) => {
