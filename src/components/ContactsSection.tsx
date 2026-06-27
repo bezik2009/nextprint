@@ -126,8 +126,8 @@ export function ContactsSection() {
             </div>
             <h2 className="nc-heading">Зв&apos;яжіться з нами</h2>
             <p className="nc-sub">
-              Готові обговорити ваш проєкт<br />
-              та запропонувати найкраще рішення.
+              Надішліть STL, STEP, 3MF, креслення або фото деталі —
+              підготуємо розрахунок вартості та строків.
             </p>
           </div>
 

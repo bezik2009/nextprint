@@ -2185,3 +2185,154 @@ a.nc-footer-link:hover { color: #F4F7FA; }
   .pg-cta-btn    { font-size: 11px; padding: 7px 12px; }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TRUST BLOCK  — tb-* classes
+   Compact 2×2 confidence section before contacts.
+   Desktop: 2×2 grid. Mobile: vertical list.
+═══════════════════════════════════════════════════════════════════════════ */
+
+.tb-section {
+  background: #020B16;
+  padding: 48px 48px 52px;
+  border-top: 1px solid rgba(244,247,250,0.07);
+}
+
+.tb-label-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.tb-label-line {
+  width: 28px; height: 2px;
+  background: #F5C400;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+.tb-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #F5C400;
+}
+
+.tb-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 48px;
+}
+
+.tb-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.tb-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  color: #F5C400;
+}
+
+.tb-text { flex: 1; }
+
+.tb-heading {
+  font-size: 14px;
+  font-weight: 700;
+  color: #F4F7FA;
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+
+.tb-body {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: rgba(244,247,250,0.50);
+}
+
+/* ── Trust block responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .tb-section { padding: 28px 20px 32px; }
+  .tb-label-row { margin-bottom: 18px; }
+  .tb-grid { grid-template-columns: 1fr; gap: 12px; }
+  .tb-heading { font-size: 13px; }
+  .tb-body { font-size: 12px; }
+}
+
+@media (max-width: 480px) {
+  .tb-section { padding: 24px 16px 28px; }
+  .tb-grid { gap: 10px; }
+  .tb-item { gap: 10px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FINAL MOBILE POLISH — all mobile-only overrides
+   Reduces remaining vertical bulk without touching desktop.
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* Global section rhythm on mobile */
+@media (max-width: 768px) {
+
+  /* ── Tighten process cards further (already horizontal layout) ── */
+  .np-proc { padding: 28px 20px 30px; }
+  .np-proc-header { margin-bottom: 12px; }
+  .np-proc-timeline { gap: 5px; }
+  .np-proc-card { padding: 9px 12px; row-gap: 3px; column-gap: 9px; }
+  .np-proc-icon svg { width: 24px !important; height: 24px !important; }
+  .np-proc-card-title { font-size: 10px; letter-spacing: 0.03em; }
+  .np-proc-card-desc  { font-size: 10px; line-height: 1.35; margin-top: 1px; }
+  .np-proc-step-num   { font-size: 9px; }
+
+  /* ── Portfolio gallery ── */
+  .pg-section { padding: 28px 16px 24px; }
+  .pg-header  { margin-bottom: 14px; }
+  .pg-grid    { gap: 5px; grid-template-rows: 190px repeat(3, 145px) auto; }
+  .pg-card-body { padding: 5px 10px 7px; }
+  .pg-card-label { font-size: 11px; }
+  .pg-card--featured .pg-card-label { font-size: 12px; }
+
+  /* ── Capabilities CTA strip ── */
+  .np-cap-cta { padding: 12px 14px; gap: 10px; }
+  .np-cap-cta-text { font-size: 13px; }
+
+  /* ── Section headings: tighter margin-bottom ── */
+  .np-about-heading   { margin-bottom: 10px; }
+  .np-cap-heading     { margin-bottom: 10px; }
+  .np-proc-heading    { margin-bottom: 6px; }
+
+  /* ── Footer: denser on mobile ── */
+  .nc-footer-grid { gap: 18px; }
+  .nc-footer-col-title { margin-bottom: 8px; font-size: 11px; }
+  .nc-footer-list { gap: 6px; }
+  .nc-footer-link { font-size: 12px; }
+  .nc-footer-tagline { font-size: 11px; }
+  .nc-footer-logo-link img { height: 28px !important; }
+}
+
+@media (max-width: 480px) {
+
+  /* ── Process even tighter ── */
+  .np-proc { padding: 24px 14px 26px; }
+  .np-proc-card { padding: 7px 10px; }
+  .np-proc-icon svg { width: 20px !important; height: 20px !important; }
+  .np-proc-card-title { font-size: 9px; }
+  .np-proc-card-desc  { font-size: 9px; }
+
+  /* ── Gallery ── */
+  .pg-section { padding: 22px 12px 20px; }
+  .pg-grid    { gap: 4px; grid-template-rows: 170px repeat(3, 125px) auto; }
+
+  /* ── Trust block ── */
+  .tb-section { padding: 20px 14px 24px; }
+  .tb-body    { font-size: 11px; }
+
+  /* ── Footer ── */
+  .nc-footer { padding: 18px 14px 0; }
+  .nc-footer-grid { gap: 14px; }
+  .nc-footer-bar  { padding: 12px 0; }
+}
