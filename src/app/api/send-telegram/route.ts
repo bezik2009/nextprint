@@ -499,15 +499,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ success:false, error:`Telegram error ${tgRes.status}` }, { status:502 });
   }
 
-  // ── 2. Telegram documents (best-effort — does not block user response) ──
-  sendTelegramDocuments(token, chatId, fileData, requestId).catch((err: unknown) => {
-    console.error("[send-telegram-doc] Unexpected error:", err instanceof Error ? err.message : err);
-  });
-
-  // ── 3. Email via Resend with real attachments (best-effort) ────────────
-  sendEmail(payload, fileData, requestId).catch((err: unknown) => {
-    console.error("[send-email] Unexpected error:", err instanceof Error ? err.message : err);
-  });
+  // ── 2+3. Telegram documents + Email (best-effort, awaited for Vercel) ───
+  // Must await before returning — Vercel serverless freezes after response,
+  // so fire-and-forget tasks would be silently dropped.
+  const bestEffortResults = await Promise.allSettled([
+    sendTelegramDocuments(token, chatId, fileData, requestId),
+    sendEmail(payload, fileData, requestId),
+  ]);
+  for (const result of bestEffortResults) {
+    if (result.status === "rejected") {
+      console.error(
+        "[send-telegram] Best-effort task failed:",
+        result.reason instanceof Error ? result.reason.message : result.reason,
+      );
+    }
+  }
 
   return NextResponse.json({ success:true, requestId });
 }
