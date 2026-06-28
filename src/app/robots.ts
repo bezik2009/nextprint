@@ -6,10 +6,11 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: [],
+        // /_next/ is intentionally NOT blocked — search engines need these
+        // assets (JS, CSS) to correctly render and index the page.
+        disallow: ["/api/"],
       },
     ],
-    host: "https://www.nextprint.com.ua",
     sitemap: "https://www.nextprint.com.ua/sitemap.xml",
   };
 }
