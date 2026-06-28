@@ -1,30 +1,34 @@
+/**
+ * sitemap.ts — NextPrint sitemap generator
+ *
+ * Auto-discovery: add a new entry to PUBLIC_ROUTES whenever a new
+ * public page route is created under src/app/.
+ * API routes, technical paths and auth pages must NOT appear here.
+ *
+ * Google ignores <changefreq> and <priority> (as of 2025).
+ * Only <loc> and <lastmod> are emitted.
+ *
+ * Update LAST_UPDATED when content meaningfully changes.
+ */
 import type { MetadataRoute } from "next";
 
 const BASE_URL = "https://www.nextprint.com.ua";
 
-// Use a fixed date string so the sitemap is stable between builds.
-// Update SITE_UPDATED when the content meaningfully changes.
-const SITE_UPDATED = new Date("2026-06-26");
+// ISO date of the last meaningful content update.
+// Update this string when you publish significant changes.
+const LAST_UPDATED = "2026-06-26";
+
+// All public page routes. Sections of the homepage (About, Process, etc.)
+// are not separate routes — the entire site is a single-page app at "/".
+const PUBLIC_ROUTES: string[] = [
+  "",          // → https://www.nextprint.com.ua/
+  "/privacy",  // → https://www.nextprint.com.ua/privacy
+  "/terms",    // → https://www.nextprint.com.ua/terms
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: BASE_URL,
-      lastModified: SITE_UPDATED,
-      changeFrequency: "monthly",
-      priority: 1.0,
-    },
-    {
-      url: `${BASE_URL}/privacy`,
-      lastModified: SITE_UPDATED,
-      changeFrequency: "yearly",
-      priority: 0.2,
-    },
-    {
-      url: `${BASE_URL}/terms`,
-      lastModified: SITE_UPDATED,
-      changeFrequency: "yearly",
-      priority: 0.2,
-    },
-  ];
+  return PUBLIC_ROUTES.map((route) => ({
+    url: `${BASE_URL}${route}`,
+    lastModified: LAST_UPDATED,
+  }));
 }

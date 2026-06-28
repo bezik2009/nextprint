@@ -6,8 +6,9 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        // /_next/ is intentionally NOT blocked — search engines need these
-        // assets (JS, CSS) to correctly render and index the page.
+        // /_next/ is intentionally NOT blocked — search engines need
+        // these assets (JS/CSS) to correctly render and index the page.
+        // /api/ blocked defensively; no public API routes exist today.
         disallow: ["/api/"],
       },
     ],
