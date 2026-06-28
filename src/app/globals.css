@@ -2659,9 +2659,51 @@ a.nc-footer-link:hover { color: #F4F7FA; }
   display: grid;
   gap: 10px;
 }
+.wz-options-grid--1col { grid-template-columns: 1fr; }
 .wz-options-grid--2col { grid-template-columns: repeat(2, 1fr); }
 .wz-options-grid--3col { grid-template-columns: repeat(3, 1fr); }
 .wz-options-grid--4col { grid-template-columns: repeat(4, 1fr); }
+
+/* Sub-heading within a step for multi-question steps */
+.wz-section-label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(244,247,250,0.45);
+  margin-bottom: 10px;
+}
+
+/* Quantity pills row — large, full-weight buttons */
+.wz-qty-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.wz-preset-pill {
+  padding: 0 20px;
+  height: 56px;
+  border: 1px solid rgba(244,247,250,0.18);
+  border-radius: 10px;
+  background: rgba(3,20,38,0.65);
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(244,247,250,0.70);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  white-space: nowrap;
+  min-width: 72px;
+}
+.wz-preset-pill:hover {
+  border-color: rgba(244,247,250,0.32);
+  color: #F4F7FA;
+}
+.wz-preset-pill--active {
+  background: rgba(245,196,0,0.10);
+  border-color: #F5C400;
+  color: #F5C400;
+}
 
 .wz-option-card {
   position: relative;
@@ -3301,4 +3343,43 @@ a.nc-footer-link:hover { color: #F4F7FA; }
   .wz-review-row--full { grid-column: auto; }
   .wz-review-row { padding: 9px 12px; }
   .wz-review-value { font-size: 13px; }
+}
+
+/* ── Deadline colour dots ─────────────────────────────────────────────────── */
+.wz-option-card--deadline { display: flex; align-items: center; gap: 10px; }
+.wz-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  flex-shrink: 0; display: inline-block;
+}
+.wz-dot--red    { background: #FF4D4D; }
+.wz-dot--yellow { background: #F5C400; }
+.wz-dot--green  { background: #4CAF50; }
+.wz-dot--gray   { background: rgba(244,247,250,0.30); }
+
+/* ── Review info block ────────────────────────────────────────────────────── */
+.wz-review-info {
+  background: rgba(245,196,0,0.05);
+  border: 1px solid rgba(245,196,0,0.18);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+.wz-review-info-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #F4F7FA;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.wz-review-info-body {
+  font-size: 12px;
+  color: rgba(244,247,250,0.60);
+  line-height: 1.55;
+  margin-bottom: 5px;
+}
+.wz-review-info-hint {
+  font-size: 11px;
+  color: rgba(244,247,250,0.35);
 }

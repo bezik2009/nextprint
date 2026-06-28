@@ -1,11 +1,28 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { formatPhoneForDisplay, validatePhone } from "./validation";
-import type { ContactErrors, WizardData, Deadline, FileFormat, Material,
-  ProductionType, SizePreset, UploadedFile, UseCase } from "./types";
+import type {
+  ContactErrors,
+  Deadline,
+  ProductionType,
+  UploadedFile,
+  UseCase,
+  WizardData,
+} from "./types";
 
-/* ── Shared sub-components ──────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────
+   Shared primitives
+───────────────────────────────────────────────────────────────────────── */
+
+function StepHeading({ title, sub }: { title: string; sub?: string }) {
+  return (
+    <div className="wz-step-head">
+      <h3 className="wz-step-title">{title}</h3>
+      {sub && <p className="wz-step-sub">{sub}</p>}
+    </div>
+  );
+}
 
 function OptionCard({
   selected,
@@ -30,13 +47,8 @@ function OptionCard({
         <span className="wz-option-check" aria-hidden="true">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <circle cx="8" cy="8" r="7" fill="#F5C400" />
-            <path
-              d="M4.5 8L7 10.5L11.5 6"
-              stroke="#020B16"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
+            <path d="M4.5 8L7 10.5L11.5 6" stroke="#020B16"
+              strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </span>
       )}
@@ -44,38 +56,37 @@ function OptionCard({
   );
 }
 
-function StepHeading({ title, sub }: { title: string; sub?: string }) {
-  return (
-    <div className="wz-step-head">
-      <h3 className="wz-step-title">{title}</h3>
-      {sub && <p className="wz-step-sub">{sub}</p>}
-    </div>
-  );
-}
+/* ─────────────────────────────────────────────────────────────────────────
+   Step 1 — What do you need to manufacture?
+───────────────────────────────────────────────────────────────────────── */
 
-/* ── Step 1 — Production type ────────────────────────────────────────────── */
+const PRODUCTION_OPTIONS: { value: ProductionType; label: string; sub: string }[] = [
+  { value: "prototype",   label: "Прототип",               sub: "Одна деталь або кілька для тесту" },
+  { value: "small-batch", label: "Мала серія",              sub: "Від 10 до 1000 деталей"          },
+  { value: "regular",     label: "Регулярне виробництво",   sub: "Постійні замовлення"              },
+];
+
 export function Step1({
   data,
   update,
+  onAutoAdvance,
 }: {
   data: WizardData;
   update: (p: Partial<WizardData>) => void;
+  onAutoAdvance?: () => void;
 }) {
-  const options: { value: ProductionType; label: string; sub: string }[] = [
-    { value: "prototype", label: "Прототип", sub: "Одна деталь або кілька для тесту" },
-    { value: "small-batch", label: "Мала серія", sub: "1–100 деталей" },
-    { value: "medium-batch", label: "Середня серія", sub: "100–1000 деталей" },
-    { value: "regular", label: "Регулярне виробництво", sub: "Постійні замовлення" },
-  ];
   return (
     <div className="wz-step">
       <StepHeading title="Що потрібно виготовити?" />
-      <div className="wz-options-grid wz-options-grid--2col">
-        {options.map((o) => (
+      <div className="wz-options-grid wz-options-grid--1col">
+        {PRODUCTION_OPTIONS.map((o) => (
           <OptionCard
             key={o.value}
             selected={data.step1_productionType === o.value}
-            onClick={() => update({ step1_productionType: o.value })}
+            onClick={() => {
+              update({ step1_productionType: o.value });
+              setTimeout(() => onAutoAdvance?.(), 180);
+            }}
             label={o.label}
             sub={o.sub}
           />
@@ -85,44 +96,190 @@ export function Step1({
   );
 }
 
-/* ── Step 2 — File format ─────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────
+   Step 2 — Do you have a model? (with inline file upload if Yes)
+───────────────────────────────────────────────────────────────────────── */
+
+const ACCEPTED = ".stl,.step,.stp,.3mf,.obj,.zip,.rar,.pdf,.dxf,.png,.jpg,.jpeg";
+
+function fmtBytes(bytes: number) {
+  return bytes > 1024 * 1024
+    ? `${(bytes / 1024 / 1024).toFixed(1)} МБ`
+    : `${Math.round(bytes / 1024)} КБ`;
+}
+
 export function Step2({
   data,
   update,
+  onFilesChange,
+  onAutoAdvance,
 }: {
   data: WizardData;
   update: (p: Partial<WizardData>) => void;
+  onFilesChange?: (files: File[]) => void;
+  onAutoAdvance?: () => void;
 }) {
-  const options: { value: FileFormat; label: string; sub?: string }[] = [
-    { value: "stl", label: "STL" },
-    { value: "step", label: "STEP" },
-    { value: "3mf", label: "3MF" },
-    { value: "drawing", label: "Креслення", sub: "PDF, DXF" },
-    { value: "photo", label: "Фото", sub: "PNG, JPG" },
-    { value: "need-modeling", label: "Потрібно змоделювати", sub: "У нас немає файлу" },
-  ];
+  const inputRef  = useRef<HTMLInputElement>(null);
+  const fileObjs  = useRef<File[]>([]);
+
+  const hasModel = data.step2_fileFormat !== "" && data.step2_fileFormat !== "need-modeling"
+    ? "yes"
+    : data.step2_fileFormat === "need-modeling"
+    ? "no"
+    : "";
+
+  const handleChoice = (choice: "yes" | "no") => {
+    if (choice === "no") {
+      update({ step2_fileFormat: "need-modeling", step8_files: [] });
+      fileObjs.current = [];
+      onFilesChange?.([]);
+      setTimeout(() => onAutoAdvance?.(), 180);
+    } else {
+      update({ step2_fileFormat: "stl" });
+    }
+  };
+
+  const handleFiles = (incoming: FileList | null) => {
+    if (!incoming) return;
+    const newFiles = Array.from(incoming);
+    fileObjs.current = [...fileObjs.current, ...newFiles];
+    const metadata: UploadedFile[] = fileObjs.current.map((f) => ({
+      name: f.name, size: f.size, type: f.type,
+    }));
+    const ext = newFiles[0]?.name.split(".").pop()?.toLowerCase();
+    const fmt = ext === "step" || ext === "stp" ? "step"
+      : ext === "3mf" ? "3mf"
+      : "stl";
+    update({ step8_files: metadata, step2_fileFormat: fmt as WizardData["step2_fileFormat"] });
+    onFilesChange?.(fileObjs.current);
+    // Auto-advance after first file is added
+    if (fileObjs.current.length === newFiles.length) {
+      setTimeout(() => onAutoAdvance?.(), 400);
+    }
+  };
+
+  const removeFile = (idx: number) => {
+    fileObjs.current = fileObjs.current.filter((_, i) => i !== idx);
+    update({ step8_files: data.step8_files.filter((_, i) => i !== idx) });
+    onFilesChange?.(fileObjs.current);
+  };
+
   return (
     <div className="wz-step">
       <StepHeading
-        title="Чи є у вас модель?"
-        sub="Оберіть формат наявного файлу або яку допомогу вам потрібно"
+        title="Є готова 3D-модель або креслення?"
+        sub="Якщо немає — нічого страшного, наш менеджер допоможе."
       />
-      <div className="wz-options-grid wz-options-grid--3col">
-        {options.map((o) => (
-          <OptionCard
-            key={o.value}
-            selected={data.step2_fileFormat === o.value}
-            onClick={() => update({ step2_fileFormat: o.value })}
-            label={o.label}
-            sub={o.sub}
-          />
-        ))}
+
+      <div className="wz-options-grid wz-options-grid--2col" style={{ marginBottom: 20 }}>
+        <OptionCard
+          selected={hasModel === "yes"}
+          onClick={() => handleChoice("yes")}
+          label="Так, є файл"
+          sub="STL, STEP, 3MF, PDF, креслення…"
+        />
+        <OptionCard
+          selected={hasModel === "no"}
+          onClick={() => handleChoice("no")}
+          label="Ні, поки немає"
+          sub="Обговоримо деталі після заявки"
+        />
       </div>
+
+      {/* Inline dropzone — visible only when "yes" is selected */}
+      {hasModel === "yes" && (
+        <>
+          <div
+            className="wz-dropzone"
+            role="button"
+            tabIndex={0}
+            aria-label="Область для завантаження файлів"
+            onClick={() => inputRef.current?.click()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
+            }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.currentTarget.classList.add("wz-dropzone--over");
+            }}
+            onDragLeave={(e) => e.currentTarget.classList.remove("wz-dropzone--over")}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.currentTarget.classList.remove("wz-dropzone--over");
+              handleFiles(e.dataTransfer.files);
+            }}
+          >
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none"
+                 aria-hidden="true" className="wz-dropzone-icon">
+              <path d="M16 20V8M16 8L11 13M16 8L21 13"
+                stroke="#F5C400" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M6 24H26" stroke="#F5C400" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+            <p className="wz-dropzone-title">
+              Перетягніть файли або{" "}
+              <span className="wz-dropzone-link">оберіть файл</span>
+            </p>
+            <p className="wz-dropzone-hint">STL, STEP, 3MF, OBJ, PDF, DXF, PNG, JPG</p>
+            <input
+              ref={inputRef}
+              type="file"
+              accept={ACCEPTED}
+              multiple
+              className="wz-file-input"
+              aria-label="Вибір файлів"
+              onChange={(e) => handleFiles(e.target.files)}
+            />
+          </div>
+
+          {data.step8_files.length > 0 && (
+            <ul className="wz-file-list" style={{ marginTop: 10 }}>
+              {data.step8_files.map((f, i) => (
+                <li key={i} className="wz-file-item">
+                  <span className="wz-file-name">{f.name}</span>
+                  <span className="wz-file-size">{fmtBytes(f.size)}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(i)}
+                    className="wz-file-remove"
+                    aria-label={`Видалити ${f.name}`}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <path d="M2 2L12 12M12 2L2 12"
+                        stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+                    </svg>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
     </div>
   );
 }
 
-/* ── Step 3 — Quantity ────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────
+   Step 3 — Quantity + Use case + Deadline (3-in-1)
+───────────────────────────────────────────────────────────────────────── */
+
+const QTY_PRESETS = ["1", "10", "50", "100", "500"];
+
+const USE_CASE_OPTIONS: { value: UseCase; label: string }[] = [
+  { value: "electronics", label: "Корпус електроніки" },
+  { value: "robotics",    label: "Робототехніка"      },
+  { value: "automotive",  label: "Автомобіль"         },
+  { value: "industrial",  label: "Промисловість"      },
+  { value: "household",   label: "Побут"              },
+  { value: "other",       label: "Інше"               },
+];
+
+const DEADLINE_OPTIONS: { value: Deadline; label: string; sub: string; dot: string }[] = [
+  { value: "urgent",   label: "Терміново",   sub: "1–2 дні", dot: "wz-dot--red"    },
+  { value: "3-5-days", label: "3–5 днів",    sub: "",        dot: "wz-dot--yellow" },
+  { value: "week",     label: "До тижня",    sub: "",        dot: "wz-dot--green"  },
+  { value: "flexible", label: "Не поспішаю", sub: "",        dot: "wz-dot--gray"   },
+];
+
 export function Step3({
   data,
   update,
@@ -130,113 +287,60 @@ export function Step3({
   data: WizardData;
   update: (p: Partial<WizardData>) => void;
 }) {
-  const presets = [1, 10, 50, 100, 500];
+  const [showCustomQty, setShowCustomQty] = useState(
+    !!data.step3_quantity && !QTY_PRESETS.includes(data.step3_quantity)
+  );
+
   return (
     <div className="wz-step">
-      <StepHeading
-        title="Яка кількість деталей?"
-        sub="Вкажіть орієнтовну кількість"
-      />
-      <div className="wz-qty-wrap">
-        <input
-          type="number"
-          min={1}
-          placeholder="250"
-          value={data.step3_quantity}
-          onChange={(e) => update({ step3_quantity: e.target.value })}
-          className="wz-input wz-input--lg"
-          aria-label="Кількість деталей"
-        />
-        <span className="wz-input-unit">шт.</span>
-      </div>
-      <div className="wz-presets">
-        {presets.map((p) => (
+      <StepHeading title="Деталі замовлення" />
+
+      {/* ── Quantity ── */}
+      <p className="wz-section-label">Кількість деталей</p>
+      <div className="wz-qty-pills">
+        {QTY_PRESETS.map((p) => (
           <button
             key={p}
             type="button"
-            onClick={() => update({ step3_quantity: String(p) })}
-            className={`wz-preset-pill${data.step3_quantity === String(p) ? " wz-preset-pill--active" : ""}`}
+            onClick={() => {
+              setShowCustomQty(false);
+              update({ step3_quantity: p });
+            }}
+            className={`wz-preset-pill${data.step3_quantity === p && !showCustomQty ? " wz-preset-pill--active" : ""}`}
           >
             {p}
           </button>
         ))}
-      </div>
-    </div>
-  );
-}
-
-/* ── Step 4 — Size ────────────────────────────────────────────────────────── */
-export function Step4({
-  data,
-  update,
-}: {
-  data: WizardData;
-  update: (p: Partial<WizardData>) => void;
-}) {
-  const presets: { value: SizePreset; label: string; sub: string }[] = [
-    { value: "xs", label: "до 5 см", sub: "Дрібні деталі" },
-    { value: "sm", label: "5–15 см", sub: "Середні деталі" },
-    { value: "md", label: "15–30 см", sub: "Великі деталі" },
-    { value: "lg", label: "більше 30 см", sub: "Габаритні деталі" },
-  ];
-  return (
-    <div className="wz-step">
-      <StepHeading
-        title="Приблизний розмір деталі"
-        sub="Вкажіть довжину × ширину × висоту або оберіть приблизний розмір"
-      />
-      <div className="wz-size-input-wrap">
-        <input
-          type="text"
-          placeholder="100 × 80 × 20"
-          value={data.step4_size}
-          onChange={(e) => {
-            update({ step4_size: e.target.value, step4_sizePreset: "" });
+        <button
+          type="button"
+          onClick={() => {
+            setShowCustomQty(true);
+            update({ step3_quantity: "" });
           }}
+          className={`wz-preset-pill${showCustomQty ? " wz-preset-pill--active" : ""}`}
+        >
+          Інша
+        </button>
+      </div>
+      {showCustomQty && (
+        <input
+          type="number"
+          min={1}
+          placeholder="Введіть кількість"
+          value={data.step3_quantity}
+          onChange={(e) => update({ step3_quantity: e.target.value })}
           className="wz-input"
-          aria-label="Розміри деталі"
+          style={{ marginTop: 10 }}
+          aria-label="Кількість деталей"
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus
         />
-        <span className="wz-input-unit">мм</span>
-      </div>
-      <p className="wz-or-label">або оберіть приблизний розмір</p>
-      <div className="wz-options-grid wz-options-grid--4col">
-        {presets.map((p) => (
-          <OptionCard
-            key={p.value}
-            selected={data.step4_sizePreset === p.value}
-            onClick={() =>
-              update({ step4_sizePreset: p.value, step4_size: "" })
-            }
-            label={p.label}
-            sub={p.sub}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
+      )}
 
-/* ── Step 5 — Use case ────────────────────────────────────────────────────── */
-export function Step5({
-  data,
-  update,
-}: {
-  data: WizardData;
-  update: (p: Partial<WizardData>) => void;
-}) {
-  const options: { value: UseCase; label: string }[] = [
-    { value: "electronics", label: "Корпус електроніки" },
-    { value: "robotics", label: "Робототехніка" },
-    { value: "automotive", label: "Автомобіль" },
-    { value: "industrial", label: "Промисловість" },
-    { value: "household", label: "Побут" },
-    { value: "other", label: "Інше" },
-  ];
-  return (
-    <div className="wz-step">
-      <StepHeading title="Для чого використовується деталь?" />
+      {/* ── Use case ── */}
+      <p className="wz-section-label" style={{ marginTop: 22 }}>Для чого потрібна деталь?</p>
       <div className="wz-options-grid wz-options-grid--3col">
-        {options.map((o) => (
+        {USE_CASE_OPTIONS.map((o) => (
           <OptionCard
             key={o.value}
             selected={data.step5_useCase === o.value}
@@ -246,236 +350,51 @@ export function Step5({
         ))}
       </div>
       {data.step5_useCase === "other" && (
-        <div className="wz-follow-up">
-          <input
-            type="text"
-            placeholder="Опишіть призначення деталі"
-            value={data.step5_useCaseOther}
-            onChange={(e) => update({ step5_useCaseOther: e.target.value })}
-            className="wz-input"
-            aria-label="Опис призначення деталі"
-          />
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ── Step 6 — Material ────────────────────────────────────────────────────── */
-export function Step6({
-  data,
-  update,
-}: {
-  data: WizardData;
-  update: (p: Partial<WizardData>) => void;
-}) {
-  const options: { value: Material; label: string; sub?: string }[] = [
-    { value: "pla", label: "PLA", sub: "Прототипи, декор" },
-    { value: "petg", label: "PETG", sub: "Функціональні деталі" },
-    { value: "abs", label: "ABS", sub: "Міцні деталі" },
-    { value: "asa", label: "ASA", sub: "Вулиця, UV-стійкий" },
-    { value: "tpu", label: "TPU", sub: "Гнучкі деталі" },
-    { value: "nylon", label: "Nylon", sub: "Інженерний пластик" },
-    { value: "pc", label: "PC", sub: "Полікарбонат" },
-    { value: "pctg", label: "PCTG", sub: "Прозорий, міцний" },
-    { value: "unknown", label: "Не знаю", sub: "Допоможемо обрати" },
-  ];
-  return (
-    <div className="wz-step">
-      <StepHeading
-        title="Який матеріал потрібен?"
-        sub="Оберіть матеріал або вкажіть що не знаєте — ми підберемо"
-      />
-      <div className="wz-options-grid wz-options-grid--3col">
-        {options.map((o) => (
-          <OptionCard
-            key={o.value}
-            selected={data.step6_material === o.value}
-            onClick={() => update({ step6_material: o.value })}
-            label={o.label}
-            sub={o.sub}
-          />
-        ))}
-      </div>
-      {data.step6_material === "unknown" && (
-        <p className="wz-helper-text">
-          Не проблема — ми допоможемо підібрати найкращий матеріал для вашого завдання.
-        </p>
-      )}
-    </div>
-  );
-}
-
-/* ── Step 7 — Deadline ────────────────────────────────────────────────────── */
-export function Step7({
-  data,
-  update,
-}: {
-  data: WizardData;
-  update: (p: Partial<WizardData>) => void;
-}) {
-  const options: { value: Deadline; label: string; sub: string }[] = [
-    { value: "urgent", label: "Терміново", sub: "1–2 дні" },
-    { value: "3-5-days", label: "3–5 днів", sub: "Стандартні строки" },
-    { value: "week", label: "До тижня", sub: "Є час на якість" },
-    { value: "flexible", label: "Не поспішає", sub: "Більше тижня" },
-  ];
-  return (
-    <div className="wz-step">
-      <StepHeading title="Коли потрібно?" />
-      <div className="wz-options-grid wz-options-grid--2col">
-        {options.map((o) => (
-          <OptionCard
-            key={o.value}
-            selected={data.step7_deadline === o.value}
-            onClick={() => update({ step7_deadline: o.value })}
-            label={o.label}
-            sub={o.sub}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ── Step 8 — File upload ─────────────────────────────────────────────────── */
-const ACCEPTED = ".stl,.step,.stp,.3mf,.obj,.zip,.rar,.pdf,.dxf,.png,.jpg,.jpeg";
-
-export function Step8({
-  data,
-  update,
-  onFilesChange,
-}: {
-  data: WizardData;
-  update: (p: Partial<WizardData>) => void;
-  /** Called with the current full File[] whenever the list changes */
-  onFilesChange?: (files: File[]) => void;
-}) {
-  const inputRef  = useRef<HTMLInputElement>(null);
-  /** Mirror of data.step8_files as real File objects — kept in sync with metadata */
-  const fileObjs  = useRef<File[]>([]);
-
-  const handleFiles = (incoming: FileList | null) => {
-    if (!incoming) return;
-    const newFiles = Array.from(incoming);
-    fileObjs.current = [...fileObjs.current, ...newFiles];
-    const metadata: UploadedFile[] = fileObjs.current.map((f) => ({
-      name: f.name,
-      size: f.size,
-      type: f.type,
-    }));
-    update({ step8_files: metadata });
-    onFilesChange?.(fileObjs.current);
-  };
-
-  const removeFile = (idx: number) => {
-    fileObjs.current = fileObjs.current.filter((_, i) => i !== idx);
-    update({
-      step8_files: data.step8_files.filter((_, i) => i !== idx),
-    });
-    onFilesChange?.(fileObjs.current);
-  };
-
-  const fmt = (bytes: number) =>
-    bytes > 1024 * 1024
-      ? `${(bytes / 1024 / 1024).toFixed(1)} МБ`
-      : `${Math.round(bytes / 1024)} КБ`;
-
-  return (
-    <div className="wz-step">
-      <StepHeading
-        title="Завантажте модель або креслення"
-        sub="Необов'язково — можна пропустити і надіслати файли пізніше"
-      />
-
-      {/* Drop zone */}
-      <div
-        className="wz-dropzone"
-        role="button"
-        tabIndex={0}
-        aria-label="Область для завантаження файлів"
-        onClick={() => inputRef.current?.click()}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
-        }}
-        onDragOver={(e) => {
-          e.preventDefault();
-          e.currentTarget.classList.add("wz-dropzone--over");
-        }}
-        onDragLeave={(e) => {
-          e.currentTarget.classList.remove("wz-dropzone--over");
-        }}
-        onDrop={(e) => {
-          e.preventDefault();
-          e.currentTarget.classList.remove("wz-dropzone--over");
-          handleFiles(e.dataTransfer.files);
-        }}
-      >
-        <svg
-          width="32"
-          height="32"
-          viewBox="0 0 32 32"
-          fill="none"
-          aria-hidden="true"
-          className="wz-dropzone-icon"
-        >
-          <path
-            d="M16 20V8M16 8L11 13M16 8L21 13"
-            stroke="#F5C400"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M6 24H26"
-            stroke="#F5C400"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-          />
-        </svg>
-        <p className="wz-dropzone-title">
-          Перетягніть файли сюди або{" "}
-          <span className="wz-dropzone-link">оберіть файл</span>
-        </p>
-        <p className="wz-dropzone-hint">STL, STEP, 3MF, OBJ, ZIP, RAR, PDF, DXF, PNG, JPG</p>
         <input
-          ref={inputRef}
-          type="file"
-          accept={ACCEPTED}
-          multiple
-          className="wz-file-input"
-          aria-label="Вибір файлів"
-          onChange={(e) => handleFiles(e.target.files)}
+          type="text"
+          placeholder="Опишіть призначення деталі"
+          value={data.step5_useCaseOther}
+          onChange={(e) => update({ step5_useCaseOther: e.target.value })}
+          className="wz-input"
+          style={{ marginTop: 10 }}
+          aria-label="Опис призначення"
         />
-      </div>
-
-      {/* File list */}
-      {data.step8_files.length > 0 && (
-        <ul className="wz-file-list" aria-label="Завантажені файли">
-          {data.step8_files.map((f, i) => (
-            <li key={i} className="wz-file-item">
-              <span className="wz-file-name">{f.name}</span>
-              <span className="wz-file-size">{fmt(f.size)}</span>
-              <button
-                type="button"
-                onClick={() => removeFile(i)}
-                className="wz-file-remove"
-                aria-label={`Видалити ${f.name}`}
-              >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                  <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-                </svg>
-              </button>
-            </li>
-          ))}
-        </ul>
       )}
+
+      {/* ── Deadline ── */}
+      <p className="wz-section-label" style={{ marginTop: 22 }}>Коли потрібно?</p>
+      <div className="wz-options-grid wz-options-grid--2col">
+        {DEADLINE_OPTIONS.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => update({ step7_deadline: o.value })}
+            className={`wz-option-card wz-option-card--deadline${data.step7_deadline === o.value ? " wz-option-card--selected" : ""}`}
+          >
+            <span className={`wz-dot ${o.dot}`} aria-hidden="true" />
+            <span className="wz-option-label">{o.label}</span>
+            {o.sub && <span className="wz-option-sub">{o.sub}</span>}
+            {data.step7_deadline === o.value && (
+              <span className="wz-option-check" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="8" r="7" fill="#F5C400" />
+                  <path d="M4.5 8L7 10.5L11.5 6" stroke="#020B16"
+                    strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
 
-/* ── Step 9 — Contacts ────────────────────────────────────────────────────── */
-export function Step9({
+/* ─────────────────────────────────────────────────────────────────────────
+   Step 4 — Contacts
+───────────────────────────────────────────────────────────────────────── */
+
+export function Step4({
   data,
   update,
   errors,
@@ -491,16 +410,17 @@ export function Step9({
   const c = data.step9_contact;
   const set = (k: keyof typeof c, v: string) => {
     update({ step9_contact: { ...c, [k]: v } });
-    onFieldChange?.(k);
+    onFieldChange?.(k as keyof ContactErrors);
   };
 
   return (
     <div className="wz-step">
       <StepHeading
         title="Ваші контакти"
-        sub="Вкажіть ім'я та хоча б один спосіб зв'язку"
+        sub="Зв'яжемося, щоб обговорити деталі та підготувати розрахунок."
       />
       <div className="wz-form-grid">
+
         <div className={`wz-field${errors.name ? " wz-field--error" : ""}`}>
           <label className="wz-label" htmlFor="wz-name">
             Ім&apos;я <span aria-hidden="true">*</span>
@@ -514,12 +434,41 @@ export function Step9({
             onChange={(e) => set("name", e.target.value)}
             onKeyDown={onKeyDown}
             aria-required="true"
-            aria-describedby={errors.name ? "wz-name-err" : undefined}
           />
-          {errors.name && (
-            <p className="wz-error" id="wz-name-err" role="alert">
-              {errors.name}
-            </p>
+          {errors.name && <p className="wz-error" role="alert">{errors.name}</p>}
+        </div>
+
+        <div className={`wz-field${errors.phone ? " wz-field--error" : ""}`}>
+          <label className="wz-label" htmlFor="wz-phone">
+            Телефон <span aria-hidden="true">*</span>
+          </label>
+          <input
+            id="wz-phone"
+            type="tel"
+            className="wz-input"
+            placeholder="+38 (067) 123 45 67"
+            value={c.phone}
+            onChange={(e) => set("phone", e.target.value)}
+            onKeyDown={onKeyDown}
+          />
+          {errors.phone && errors.phone.trim() && (
+            <p className="wz-error" role="alert">{errors.phone}</p>
+          )}
+        </div>
+
+        <div className={`wz-field${errors.email ? " wz-field--error" : ""}`}>
+          <label className="wz-label" htmlFor="wz-email">Email</label>
+          <input
+            id="wz-email"
+            type="email"
+            className="wz-input"
+            placeholder="ivan@company.com"
+            value={c.email}
+            onChange={(e) => set("email", e.target.value)}
+            onKeyDown={onKeyDown}
+          />
+          {errors.email && errors.email.trim() && (
+            <p className="wz-error" role="alert">{errors.email}</p>
           )}
         </div>
 
@@ -536,56 +485,18 @@ export function Step9({
           />
         </div>
 
-        <div className={`wz-field${errors.email ? " wz-field--error" : ""}`}>
-          <label className="wz-label" htmlFor="wz-email">Email</label>
-          <input
-            id="wz-email"
-            type="email"
-            className="wz-input"
-            placeholder="ivan@company.com"
-            value={c.email}
-            onChange={(e) => set("email", e.target.value)}
-            onKeyDown={onKeyDown}
-            aria-describedby={errors.email ? "wz-email-err" : undefined}
-          />
-          {errors.email && errors.email.trim() && (
-            <p className="wz-error" id="wz-email-err" role="alert">
-              {errors.email}
-            </p>
-          )}
-        </div>
-
-        <div className={`wz-field${errors.phone ? " wz-field--error" : ""}`}>
-          <label className="wz-label" htmlFor="wz-phone">Телефон</label>
-          <input
-            id="wz-phone"
-            type="tel"
-            className="wz-input"
-            placeholder="+38 (067) 123 45 67"
-            value={c.phone}
-            onChange={(e) => set("phone", e.target.value)}
-            onKeyDown={onKeyDown}
-            aria-describedby={errors.phone ? "wz-phone-err" : undefined}
-          />
-          {errors.phone && errors.phone.trim() && (
-            <p className="wz-error" id="wz-phone-err" role="alert">
-              {errors.phone}
-            </p>
-          )}
-        </div>
-
         {errors._contact && (
-          <p className="wz-error wz-error--span" role="alert">
-            {errors._contact}
-          </p>
+          <p className="wz-error wz-error--span" role="alert">{errors._contact}</p>
         )}
 
         <div className="wz-field wz-field--full">
-          <label className="wz-label" htmlFor="wz-comment">Коментар</label>
+          <label className="wz-label" htmlFor="wz-comment">
+            Є щось важливе, що нам потрібно знати?
+          </label>
           <textarea
             id="wz-comment"
             className="wz-input wz-textarea"
-            placeholder="Будь-яка додаткова інформація про ваше замовлення"
+            placeholder="Наприклад: потрібна висока міцність, бажаний колір, потрібно допомогти з вибором матеріалу тощо."
             rows={3}
             value={c.comment}
             onChange={(e) => set("comment", e.target.value)}
@@ -596,15 +507,10 @@ export function Step9({
   );
 }
 
-/* ── Step 10 — Preview / Review ───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────
+   Step 5 — Preview / Review
+───────────────────────────────────────────────────────────────────────── */
 
-function fmtBytes(bytes: number) {
-  return bytes > 1024 * 1024
-    ? `${(bytes / 1024 / 1024).toFixed(1)} МБ`
-    : `${Math.round(bytes / 1024)} КБ`;
-}
-
-/** Truncate long comment to ~160 chars at a word boundary */
 function truncateComment(text: string, max = 160): string {
   if (text.length <= max) return text;
   const cut = text.slice(0, max);
@@ -613,61 +519,33 @@ function truncateComment(text: string, max = 160): string {
 }
 
 const PRODUCTION_TYPE_LABELS: Record<string, string> = {
-  prototype: "Прототип",
-  "small-batch": "Мала серія (1–100)",
-  "medium-batch": "Середня серія (100–1000)",
-  regular: "Регулярне виробництво",
+  prototype:     "Прототип",
+  "small-batch": "Мала серія",
+  regular:       "Регулярне виробництво",
 };
-const FILE_FORMAT_LABELS: Record<string, string> = {
-  stl: "STL",
-  step: "STEP",
-  "3mf": "3MF",
-  drawing: "Креслення",
-  photo: "Фото",
-  "need-modeling": "Потрібно змоделювати",
-};
+
 const USE_CASE_LABELS: Record<string, string> = {
   electronics: "Корпус електроніки",
-  robotics: "Робототехніка",
-  automotive: "Автомобіль",
-  industrial: "Промисловість",
-  household: "Побут",
-  other: "Інше",
+  robotics:    "Робототехніка",
+  automotive:  "Автомобіль",
+  industrial:  "Промисловість",
+  household:   "Побут",
+  other:       "Інше",
 };
-const MATERIAL_LABELS: Record<string, string> = {
-  pla: "PLA",
-  petg: "PETG",
-  abs: "ABS",
-  asa: "ASA",
-  tpu: "TPU",
-  nylon: "Nylon",
-  pc: "PC",
-  pctg: "PCTG",
-  unknown: "Не знаю (допоможіть обрати)",
-};
+
 const DEADLINE_LABELS: Record<string, string> = {
-  urgent: "Терміново (1–2 дні)",
-  "3-5-days": "3–5 днів",
-  week: "До тижня",
-  flexible: "Не поспішає",
-};
-const SIZE_PRESET_LABELS: Record<string, string> = {
-  xs: "до 5 см",
-  sm: "5–15 см",
-  md: "15–30 см",
-  lg: "більше 30 см",
+  urgent:    "Терміново (1–2 дні)",
+  "3-5-days":"3–5 днів",
+  week:      "До тижня",
+  flexible:  "Не поспішаю",
 };
 
 const EMPTY = <span className="wz-review-empty">Не вказано</span>;
 
 function ReviewRow({
-  label,
-  value,
-  onEdit,
+  label, value, onEdit,
 }: {
-  label: string;
-  value: React.ReactNode;
-  onEdit: () => void;
+  label: string; value: React.ReactNode; onEdit: () => void;
 }) {
   return (
     <div className="wz-review-row">
@@ -675,19 +553,13 @@ function ReviewRow({
         <p className="wz-review-label">{label}</p>
         <div className="wz-review-value">{value}</div>
       </div>
-      <button
-        type="button"
-        onClick={onEdit}
-        className="wz-review-edit"
-        aria-label={`Змінити: ${label}`}
-      >
-        Змінити
-      </button>
+      <button type="button" onClick={onEdit} className="wz-review-edit"
+              aria-label={`Змінити: ${label}`}>Змінити</button>
     </div>
   );
 }
 
-export function Step10({
+export function Step5({
   data,
   onEdit,
   contactsValid,
@@ -700,51 +572,40 @@ export function Step10({
 }) {
   const c = data.step9_contact;
 
-  /* ── Contact multiline block ── */
   const displayPhone = c.phone.trim() && validatePhone(c.phone)
-    ? formatPhoneForDisplay(c.phone)
-    : c.phone.trim();
+    ? formatPhoneForDisplay(c.phone) : c.phone.trim();
 
   const contactLines = [c.name, c.company, c.email, displayPhone].filter(Boolean);
-  const contactValue =
-    contactLines.length > 0 ? (
-      <span className="wz-review-contact-lines">
-        {contactLines.map((line, i) => (
-          <span key={i} className="wz-review-contact-line">{line}</span>
-        ))}
-      </span>
-    ) : EMPTY;
+  const contactValue = contactLines.length > 0 ? (
+    <span className="wz-review-contact-lines">
+      {contactLines.map((line, i) => (
+        <span key={i} className="wz-review-contact-line">{line}</span>
+      ))}
+    </span>
+  ) : EMPTY;
 
-  /* ── Size ── */
-  const sizeValue = data.step4_size
-    ? `${data.step4_size} мм`
-    : data.step4_sizePreset
-    ? SIZE_PRESET_LABELS[data.step4_sizePreset]
-    : "";
+  const hasModel = data.step2_fileFormat !== "" && data.step2_fileFormat !== "need-modeling";
+  const modelValue = hasModel
+    ? (data.step8_files.length > 0
+        ? `${data.step8_files.length} файл(ів) завантажено`
+        : "Є файл")
+    : "Немає файлу";
 
-  /* ── Use case ── */
   const useCaseValue =
     data.step5_useCase === "other" && data.step5_useCaseOther
-      ? `Інше: ${data.step5_useCaseOther}`
-      : data.step5_useCase
-      ? USE_CASE_LABELS[data.step5_useCase]
-      : "";
+      ? `Інше — ${data.step5_useCaseOther}`
+      : data.step5_useCase ? USE_CASE_LABELS[data.step5_useCase] : "";
 
-  /* ── Comment (truncated) ── */
-  const commentDisplay = c.comment.trim()
-    ? truncateComment(c.comment.trim())
-    : null;
+  const commentDisplay = c.comment.trim() ? truncateComment(c.comment.trim()) : null;
 
-  const rows: { label: string; value: React.ReactNode; step: number }[] = [
+  const rows = [
     { label: "Тип замовлення",    value: PRODUCTION_TYPE_LABELS[data.step1_productionType] || EMPTY, step: 1 },
-    { label: "Модель / файл",     value: FILE_FORMAT_LABELS[data.step2_fileFormat] || EMPTY,         step: 2 },
-    { label: "Кількість деталей", value: data.step3_quantity ? `${data.step3_quantity} шт.` : EMPTY, step: 3 },
-    { label: "Розмір деталі",     value: sizeValue || EMPTY,                                          step: 4 },
-    { label: "Сфера використання",value: useCaseValue || EMPTY,                                       step: 5 },
-    { label: "Матеріал",          value: MATERIAL_LABELS[data.step6_material] || EMPTY,               step: 6 },
-    { label: "Строки",            value: DEADLINE_LABELS[data.step7_deadline] || EMPTY,               step: 7 },
-    { label: "Контакти",          value: contactValue,                                                 step: 9 },
-    { label: "Коментар",          value: commentDisplay || EMPTY,                                      step: 9 },
+    { label: "Модель / файл",     value: modelValue,                                                   step: 2 },
+    { label: "Кількість",         value: data.step3_quantity ? `${data.step3_quantity} шт.` : EMPTY,  step: 3 },
+    { label: "Призначення",       value: useCaseValue || EMPTY,                                        step: 3 },
+    { label: "Коли потрібно",     value: DEADLINE_LABELS[data.step7_deadline] || EMPTY,               step: 3 },
+    { label: "Контакти",          value: contactValue,                                                  step: 4 },
+    { label: "Коментар",          value: commentDisplay || EMPTY,                                       step: 4 },
   ];
 
   return (
@@ -754,21 +615,33 @@ export function Step10({
         sub="Переконайтесь, що все вірно перед відправкою."
       />
 
-      {/* Status / error line */}
+      {/* Engineer info block */}
+      {contactsValid && !submitError && (
+        <div className="wz-review-info">
+          <p className="wz-review-info-title">
+            <span className="wz-review-check" aria-hidden="true">✓</span>{" "}
+            Все готово!
+          </p>
+          <p className="wz-review-info-body">
+            Після надсилання ми перевіримо заявку, переглянемо модель або
+            креслення, якщо ви їх прикріпили, і зв&apos;яжемося з вами для
+            уточнення деталей.
+          </p>
+          <p className="wz-review-info-hint">
+            Зазвичай відповідаємо протягом 1 робочого дня.
+          </p>
+        </div>
+      )}
+
       {submitError ? (
         <p className="wz-review-warning wz-review-warning--submit" role="alert">
           {submitError}
         </p>
-      ) : contactsValid ? (
-        <p className="wz-review-status">
-          <span className="wz-review-check" aria-hidden="true">✓</span>{" "}
-          Все готово до відправки.
-        </p>
-      ) : (
+      ) : !contactsValid ? (
         <p className="wz-review-warning" role="alert">
           Перевірте контактні дані перед відправкою
         </p>
-      )}
+      ) : null}
 
       <div className="wz-review-grid">
         {rows.map((row) => (
@@ -780,7 +653,7 @@ export function Step10({
           />
         ))}
 
-        {/* Files row — full width */}
+        {/* Uploaded files — full width */}
         <div className="wz-review-row wz-review-row--full">
           <div className="wz-review-row-inner">
             <p className="wz-review-label">Файли</p>
@@ -799,12 +672,8 @@ export function Step10({
               )}
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => onEdit(8)}
-            className="wz-review-edit"
-            aria-label="Змінити: Файли"
-          >
+          <button type="button" onClick={() => onEdit(2)}
+                  className="wz-review-edit" aria-label="Змінити: Файли">
             Змінити
           </button>
         </div>

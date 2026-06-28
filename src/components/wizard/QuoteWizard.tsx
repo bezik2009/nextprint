@@ -9,11 +9,6 @@ import {
   Step3,
   Step4,
   Step5,
-  Step6,
-  Step7,
-  Step8,
-  Step9,
-  Step10,
 } from "./WizardSteps";
 
 /* ── Progress bar ───────────────────────────────────────────────────────── */
@@ -69,13 +64,15 @@ function SuccessScreen({ onClose, onReset }: { onClose: () => void; onReset: () 
           <path d="M14 24L20.5 30.5L34 17" stroke="#F5C400" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-      <h3 className="wz-success-title">Дякуємо!</h3>
+      <h3 className="wz-success-title">🎉 Дякуємо!</h3>
       <p className="wz-success-body">
-        Ми отримали вашу заявку. Наш інженер проаналізує інформацію та
-        зв&apos;яжеться з вами найближчим часом.
+        Вашу заявку успішно отримано. Наш інженер вже почав її опрацьовувати.
+      </p>
+      <p className="wz-success-body" style={{ marginTop: 8 }}>
+        Якщо ви прикріпили модель — ми попередньо її переглянемо ще до дзвінка.
       </p>
       <p className="wz-success-hint">
-        Зазвичай ми відповідаємо протягом однієї години у робочий час.
+        Зазвичай ми відповідаємо протягом 30–60 хвилин у робочий час.
       </p>
       <div className="wz-success-actions">
         <button type="button" onClick={onClose} className="wz-btn wz-btn--primary">
@@ -98,39 +95,34 @@ function validateStep(
 ): { valid: boolean; contactErrors?: ContactErrors } {
   switch (step) {
     case 1: return { valid: !!data.step1_productionType };
-    case 2: return { valid: !!data.step2_fileFormat };
-    case 3: return { valid: !!data.step3_quantity && Number(data.step3_quantity) >= 1 };
-    case 4: return { valid: !!(data.step4_size || data.step4_sizePreset) };
-    case 5: return { valid: !!data.step5_useCase };
-    case 6: return { valid: !!data.step6_material };
-    case 7: return { valid: !!data.step7_deadline };
-    case 8: return { valid: true };
-    case 9: {
+    case 2: return { valid: data.step2_fileFormat !== "" }; // yes or no — either is valid
+    case 3: return {
+      valid:
+        !!data.step3_quantity &&
+        Number(data.step3_quantity) >= 1 &&
+        !!data.step5_useCase &&
+        !!data.step7_deadline,
+    };
+    case 4: {
       const c = data.step9_contact;
       const errors: ContactErrors = {};
 
-      // Name: required, min 2 chars after trim
       if (!c.name.trim() || c.name.trim().length < 2) {
         errors.name = "Вкажіть імʼя";
       }
 
-      const emailFilled = c.email.trim().length > 0;
+      // Phone is required in new flow
       const phoneFilled = c.phone.trim().length > 0;
-
-      // Email format (only if filled)
-      if (emailFilled && !validateEmail(c.email)) {
-        errors.email = "Вкажіть коректний email";
-      }
-
-      // Phone format (only if filled)
-      if (phoneFilled && !validatePhone(c.phone)) {
+      if (!phoneFilled) {
+        errors.phone = "Вкажіть телефон";
+      } else if (!validatePhone(c.phone)) {
         errors.phone = "Вкажіть коректний номер телефону";
       }
 
-      // Show "need one contact method" ONLY when both fields are completely empty.
-      // If they're filled but invalid we already show format errors — don't pile on.
-      if (!emailFilled && !phoneFilled) {
-        errors._contact = "Вкажіть email або телефон";
+      // Email optional but validated if filled
+      const emailFilled = c.email.trim().length > 0;
+      if (emailFilled && !validateEmail(c.email)) {
+        errors.email = "Вкажіть коректний email";
       }
 
       return { valid: Object.keys(errors).length === 0, contactErrors: errors };
@@ -219,7 +211,7 @@ export function QuoteWizard() {
   /** Send wizard data + real files to the backend endpoint. */
   const handleSubmitQuote = async () => {
     // Safety re-validation before network call
-    const { valid: contactsOk, contactErrors: errs } = validateStep(9, data);
+    const { valid: contactsOk, contactErrors: errs } = validateStep(4, data);
     if (!contactsOk) {
       setShowValidation(true);
       if (errs) setContactErrors(errs);
@@ -294,7 +286,7 @@ export function QuoteWizard() {
 
   const handleNext = () => {
     // Normalise contacts before validation when leaving step 9
-    if (step === 9) normaliseContacts();
+    if (step === 4) normaliseContacts();
 
     const { valid, contactErrors: errs } = validateStep(step, data);
     if (!valid) {
@@ -312,7 +304,7 @@ export function QuoteWizard() {
   };
 
   // Enter key on Step 9 text inputs (not textarea) advances the wizard
-  const handleStep9KeyDown = (e: React.KeyboardEvent) => {
+  const handleStep4KeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
       e.preventDefault();
       handleNext();
@@ -329,7 +321,7 @@ export function QuoteWizard() {
 
   // Step 10 safety: re-validate contacts in case of a stale localStorage draft
   const { valid: contactsValid } = step === TOTAL_STEPS
-    ? validateStep(9, data)
+    ? validateStep(4, data)
     : { valid: true };
 
   return (
@@ -383,26 +375,28 @@ export function QuoteWizard() {
 
             {/* Step content */}
             <div className="wz-modal-body">
-              {step === 1 && <Step1 data={data} update={updateData} />}
-              {step === 2 && <Step2 data={data} update={updateData} />}
-              {step === 3 && <Step3 data={data} update={updateData} />}
-              {step === 4 && <Step4 data={data} update={updateData} />}
-              {step === 5 && <Step5 data={data} update={updateData} />}
-              {step === 6 && <Step6 data={data} update={updateData} />}
-              {step === 7 && <Step7 data={data} update={updateData} />}
-              {step === 8 && (
-                <Step8
+              {step === 1 && (
+                <Step1
+                  data={data}
+                  update={updateData}
+                  onAutoAdvance={goNext}
+                />
+              )}
+              {step === 2 && (
+                <Step2
                   data={data}
                   update={updateData}
                   onFilesChange={(files) => { fileStore.current = files; }}
+                  onAutoAdvance={goNext}
                 />
               )}
-              {step === 9 && (
-                <Step9
+              {step === 3 && <Step3 data={data} update={updateData} />}
+              {step === 4 && (
+                <Step4
                   data={data}
                   update={updateData}
                   errors={showValidation ? contactErrors : {}}
-                  onKeyDown={handleStep9KeyDown}
+                  onKeyDown={handleStep4KeyDown}
                   onFieldChange={(field) => {
                     if (!showValidation) return;
                     setContactErrors((prev) => {
@@ -414,8 +408,8 @@ export function QuoteWizard() {
                   }}
                 />
               )}
-              {step === 10 && (
-                <Step10
+              {step === 5 && (
+                <Step5
                   data={data}
                   contactsValid={contactsValid}
                   submitError={submitError}
@@ -426,15 +420,6 @@ export function QuoteWizard() {
 
             {/* Navigation */}
             <div className="wz-modal-footer">
-              {step === 8 && (
-                <button
-                  type="button"
-                  onClick={goNext}
-                  className="wz-btn wz-btn--skip"
-                >
-                  Пропустити
-                </button>
-              )}
               <div className="wz-nav">
                 <button
                   type="button"

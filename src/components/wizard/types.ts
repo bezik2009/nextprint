@@ -84,7 +84,7 @@ export const INITIAL_DATA: WizardData = {
   step9_contact: { name: "", company: "", email: "", phone: "", comment: "" },
 };
 
-export const TOTAL_STEPS = 10;
+export const TOTAL_STEPS = 5;
 
 /** Draft stored in localStorage */
 export interface WizardDraft {
