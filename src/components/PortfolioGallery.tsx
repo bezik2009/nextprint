@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback } from "react";
+import { useWizard } from "@/components/wizard";
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 interface PortfolioItem {
@@ -86,15 +86,7 @@ function IconArrow() {
    • CTA tile: row 3, column 4 — no image
 ═══════════════════════════════════════════════════════════════════════════ */
 export function PortfolioGallery() {
-  const handleCtaClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const el = document.getElementById("contacts");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-      history.pushState(null, "", "#contacts");
-    }
-  }, []);
-
+  const { open } = useWizard();
   const [featured, ...rest] = ITEMS; // 01 = featured, rest = 02–08
 
   return (
@@ -159,11 +151,11 @@ export function PortfolioGallery() {
         ))}
 
         {/* ── CTA tile — no image ───────────────────────────────────── */}
-        <a
-          href="#contacts"
-          onClick={handleCtaClick}
+        <button
+          type="button"
+          onClick={open}
           className="pg-cta-tile"
-          aria-label="Зв'язатися з нами для розрахунку замовлення"
+          aria-label="Отримати розрахунок — відкрити форму"
         >
           {/* Yellow glow accent */}
           <div className="pg-cta-glow" aria-hidden="true" />
@@ -184,7 +176,7 @@ export function PortfolioGallery() {
             Зв&apos;язатися з нами
             <IconArrow />
           </span>
-        </a>
+        </button>
 
       </div>
     </section>

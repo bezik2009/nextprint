@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { siteConfig } from "@/lib/siteConfig";
+import { WizardCTA } from "@/components/wizard";
 
 /* ── Shared hex icon wrapper (same pattern as all other sections) ────────── */
 function HexIcon({ children, size = 56 }: { children: React.ReactNode; size?: number }) {
@@ -162,6 +163,13 @@ export function ContactsSection() {
               <p className="nc-card-value">Україна</p>
             </div>
           </div>
+        </div>
+
+        {/* Primary CTA — opens Quote Wizard */}
+        <div className="nc-wizard-cta">
+          <WizardCTA className="nc-wizard-btn">
+            Отримати розрахунок →
+          </WizardCTA>
         </div>
       </section>
 

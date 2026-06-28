@@ -172,6 +172,7 @@ export function AboutSection() {
               width={620}
               height={290}
               className="np-about-printers-img"
+              style={{ width: "100%", height: "auto" }}
               priority={false}
             />
           </div>

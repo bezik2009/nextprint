@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback } from "react";
 
 /* ── SVG icons for feature cards ────────────────────────────────────────── */
 function IconBox() {
@@ -142,18 +141,13 @@ const STATS = [
   { Icon: IconTarget,  value: "±0.1",             unit: " мм",label: "точність друку", sub: "" },
 ];
 
+import { useWizard } from "@/components/wizard";
+
 /* ═══════════════════════════════════════════════════════════════════════════
    HeroSection
 ═══════════════════════════════════════════════════════════════════════════ */
 export function HeroSection() {
-  const handleCtaClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const el = document.getElementById("contacts");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-      history.pushState(null, "", "#contacts");
-    }
-  }, []);
+  const { open } = useWizard();
 
   return (
     <section id="hero" className="nh-section" aria-label="Головний екран">
@@ -197,18 +191,18 @@ export function HeroSection() {
         </div>
 
         {/* CTA — left col on desktop, just below image on mobile */}
-        <a
-          href="#contacts"
-          onClick={handleCtaClick}
+        <button
+          type="button"
+          onClick={open}
           className="nh-cta"
-          aria-label="Зв'язатися з нами — перейти до контактів"
+          aria-label="Отримати розрахунок — відкрити форму"
         >
           Зв&apos;язатися з нами
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
             <path d="M3 9H15M15 9L10 4M15 9L10 14"
               stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-        </a>
+        </button>
 
         {/* FEATURE CARDS — left col on desktop, below CTA on mobile */}
         <div className="nh-cards" role="list">

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { siteConfig } from "@/lib/siteConfig";
+import { WizardCTA } from "@/components/wizard";
 
 /* ── Shared hex icon wrapper (same style as About section) ─────────────── */
 function HexIcon({ children, size = 48 }: { children: React.ReactNode; size?: number }) {
@@ -274,9 +275,9 @@ export function CapabilitiesSection() {
           <HexIcon size={44}><IconConsult /></HexIcon>
           <p className="np-cap-cta-text">Потрібна консультація або розрахунок?</p>
         </div>
-        <a href={`mailto:${siteConfig.email}`} className="np-cap-cta-btn">
+        <WizardCTA className="np-cap-cta-btn">
           Звʼязатися з нами →
-        </a>
+        </WizardCTA>
       </div>
 
     </section>

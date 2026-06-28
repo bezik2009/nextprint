@@ -96,6 +96,8 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
+import { WizardProvider, QuoteWizard } from "@/components/wizard";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -103,7 +105,10 @@ export default function RootLayout({
     <html lang="uk" className={manrope.className}>
       <body>
         <StructuredData />
-        {children}
+        <WizardProvider>
+          {children}
+          <QuoteWizard />
+        </WizardProvider>
       </body>
     </html>
   );
