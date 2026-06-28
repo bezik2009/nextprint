@@ -362,13 +362,19 @@ async function sendTelegramDocuments(
 ): Promise<void> {
   if (files.length === 0) return;
 
+  console.log(`[send-telegram-doc] ${requestId} — sending ${files.length} file(s)`);
+
   const url = `https://api.telegram.org/bot${token}/sendDocument`;
 
   for (const { meta, buffer } of files) {
     try {
+      console.log(`[send-telegram-doc] ${requestId} — uploading "${meta.name}" (${fmtBytes(meta.size)})`);
+
       const form = new FormData();
-      form.append("chat_id",  chatId);
-      form.append("caption",  `Файл до заявки ${requestId}: ${meta.name}`);
+      form.append("chat_id", chatId);
+      form.append("caption", `Файл до заявки ${requestId}: ${meta.name}`);
+      // Blob + filename as third arg is required for multipart/form-data filename param.
+      // Do NOT set Content-Type manually — browser/node sets multipart boundary automatically.
       form.append(
         "document",
         new Blob([buffer], { type: meta.type || "application/octet-stream" }),
@@ -377,14 +383,31 @@ async function sendTelegramDocuments(
 
       const res = await fetch(url, { method: "POST", body: form });
 
-      if (!res.ok) {
-        // Log only non-personal details: filename and HTTP status
-        console.error(`[send-telegram-doc] ${meta.name} → HTTP ${res.status}`);
+      if (res.ok) {
+        console.log(`[send-telegram-doc] ${requestId} — "${meta.name}" sent OK (${res.status})`);
+      } else {
+        // Read Telegram's JSON error body to get the description
+        let tgDescription = "(could not parse body)";
+        try {
+          const body = await res.json() as { ok: boolean; description?: string };
+          tgDescription = body.description ?? tgDescription;
+        } catch {
+          // ignore parse failure
+        }
+        console.error(
+          `[send-telegram-doc] ${requestId} — "${meta.name}" failed:`,
+          `HTTP ${res.status} —`, tgDescription,
+        );
       }
     } catch (err) {
-      console.error(`[send-telegram-doc] ${meta.name} →`, err instanceof Error ? err.message : err);
+      console.error(
+        `[send-telegram-doc] ${requestId} — "${meta.name}" network error:`,
+        err instanceof Error ? err.message : err,
+      );
     }
   }
+
+  console.log(`[send-telegram-doc] ${requestId} — done`);
 }
 
 
