@@ -186,7 +186,7 @@ export function ContactsSection() {
                 style={{
                   width: "auto",
                   height: "auto",
-                  maxWidth: 260,
+                  maxWidth: 200,
                   objectFit: "contain",
                   display: "block",
                 }}

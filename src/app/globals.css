@@ -511,8 +511,8 @@ body {
 }
 .np-about-grid {
   display: grid;
-  grid-template-columns: 44% 56%;
-  gap: 56px;
+  grid-template-columns: 60% 40%;
+  gap: 44px;
   align-items: start;
   margin-bottom: 30px;
   position: relative;
@@ -553,7 +553,7 @@ body {
   font-weight: 400;
   line-height: 1.6;
   color: rgba(244,247,250,0.64);
-  max-width: 520px;
+  max-width: 640px;
   margin-bottom: 10px;
 }
 .np-about-body--last { margin-bottom: 16px; }
@@ -591,7 +591,7 @@ body {
   background: rgba(3,20,38,0.55);
   border: 1px solid rgba(244,247,250,0.20);
   border-radius: 10px;
-  padding: 36px 48px;
+  padding: 28px 36px;
   position: relative;
   align-self: start;
   box-shadow:
@@ -632,8 +632,8 @@ body {
 .np-about-feature-row {
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding: 22px 0;
+  gap: 14px;
+  padding: 16px 0;
   border-bottom: 1px solid rgba(244,247,250,0.07);
 }
 .np-about-feature-row:first-child { padding-top: 0; }
@@ -1385,12 +1385,13 @@ body {
    All nc-* classes. Palette matches site-wide design system.
 ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Contacts section ────────────────────────────────────────────────────── */
+/* Subtle visual separator: content area → contacts/footer */
 .nc-section {
   background: #050D18;
   padding: 72px 48px 64px;
   position: relative;
   overflow: hidden;
+  border-top: 1px solid rgba(244,247,250,0.06);
 }
 
 /* Two-column: left 50% text / right 50% map */
@@ -1508,15 +1509,15 @@ body {
 /* ── Footer ──────────────────────────────────────────────────────────────── */
 .nc-footer {
   background: #050D18;
-  border-top: 1px solid rgba(244,247,250,0.10);
-  padding: 52px 48px 0;
+  border-top: 1px solid rgba(244,247,250,0.06);
+  padding: 36px 48px 0;
 }
 
 .nc-footer-grid {
   display: grid;
   grid-template-columns: 1.6fr 1fr 1fr;
-  gap: 40px;
-  padding-bottom: 48px;
+  gap: 32px;
+  padding-bottom: 32px;
 }
 
 .nc-footer-col {
@@ -1546,7 +1547,7 @@ body {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(244,247,250,0.55);
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 /* Links list */
@@ -1554,7 +1555,7 @@ body {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 8px;
 }
 
 .nc-footer-link {
@@ -1585,7 +1586,7 @@ a.nc-footer-link:hover { color: #F4F7FA; }
 /* Bottom bar */
 .nc-footer-bar {
   border-top: 1px solid rgba(244,247,250,0.08);
-  padding: 20px 0;
+  padding: 14px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
