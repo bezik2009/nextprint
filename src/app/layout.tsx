@@ -22,9 +22,9 @@ const GSC_TOKEN     = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? "";
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
 
-  title: "Малосерійне виробництво пластикових деталей та компонентів | NextPrint",
+  title: "NextPrint — FDM 3D друк пластикових деталей",
   description:
-    "NextPrint — малосерійне виробництво пластикових деталей та компонентів. FDM 3D-друк, прототипування, дизайн виробів, інженерні матеріали, малі серії та доставка по Україні.",
+    "Малосерійне виробництво пластикових деталей на FDM 3D-принтерах. Прототипи, серії, інженерні матеріали, доставка по Україні.",
 
   applicationName: "NextPrint",
   authors: [{ name: "NextPrint", url: BASE_URL }],
@@ -47,10 +47,10 @@ export const metadata: Metadata = {
     "3D printing Ukraine",
   ],
 
-  /* Canonical */
+  /* Canonical — trailing slash for homepage consistency */
   alternates: {
-    canonical: BASE_URL,
-    languages: { "uk-UA": BASE_URL },
+    canonical: `${BASE_URL}/`,
+    languages: { "uk-UA": `${BASE_URL}/` },
   },
 
   /* Robots */
@@ -64,17 +64,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "uk_UA",
-    url: BASE_URL,
+    url: `${BASE_URL}/`,
     siteName: "NextPrint",
-    title: "NextPrint — Малосерійне виробництво пластикових деталей",
+    title: "NextPrint — FDM 3D друк пластикових деталей",
     description:
-      "Від прототипу до серії. Професійний FDM 3D-друк, інженерні матеріали та доставка по Україні.",
+      "Малосерійне виробництво пластикових деталей на FDM 3D-принтерах. Прототипи, серії, інженерні матеріали, доставка по Україні.",
     images: [
       {
         url: `${BASE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: "NextPrint — Малосерійне виробництво пластикових деталей",
+        alt: "NextPrint — FDM 3D друк пластикових деталей",
       },
     ],
   },
@@ -82,9 +82,9 @@ export const metadata: Metadata = {
   /* Twitter / X */
   twitter: {
     card: "summary_large_image",
-    title: "NextPrint — Малосерійне виробництво пластикових деталей",
+    title: "NextPrint — FDM 3D друк пластикових деталей",
     description:
-      "Від прототипу до серії. Професійний FDM 3D-друк, інженерні матеріали та доставка по Україні.",
+      "Малосерійне виробництво пластикових деталей на FDM 3D-принтерах. Прототипи, серії, інженерні матеріали, доставка по Україні.",
     images: [`${BASE_URL}/og-image.png`],
   },
 

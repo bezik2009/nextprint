@@ -6,10 +6,8 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        // /_next/ is intentionally NOT blocked — search engines need
-        // these assets (JS/CSS) to correctly render and index the page.
-        // /api/ blocked defensively; no public API routes exist today.
-        disallow: ["/api/"],
+        // /_next/ intentionally NOT blocked — crawlers need these assets to render.
+        // /api/ NOT blocked — spec requires open crawling; no sensitive routes exposed.
       },
     ],
     sitemap: "https://www.nextprint.com.ua/sitemap.xml",
