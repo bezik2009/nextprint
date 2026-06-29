@@ -72,7 +72,7 @@ function SuccessScreen({ onClose, onReset }: { onClose: () => void; onReset: () 
         Якщо ви прикріпили модель — ми попередньо її переглянемо ще до дзвінка.
       </p>
       <p className="wz-success-hint">
-        Зазвичай ми відповідаємо протягом 30–60 хвилин у робочий час.
+        Зазвичай ми відповідаємо протягом 1 робочого дня.
       </p>
       <div className="wz-success-actions">
         <button type="button" onClick={onClose} className="wz-btn wz-btn--primary">
@@ -88,6 +88,7 @@ function SuccessScreen({ onClose, onReset }: { onClose: () => void; onReset: () 
 
 import { validateEmail, validatePhone } from "./validation";
 import type { ContactErrors } from "./types";
+import { trackQuoteStarted, trackStep, trackSubmitted, trackTelegramOk, trackEmailOk } from "@/lib/tracking";
 
 function validateStep(
   step: number,
@@ -270,6 +271,13 @@ export function QuoteWizard() {
       // Success — clear draft and real files
       fileStore.current = [];
       setSubmitted(true);
+
+      // TODO: API currently returns only { success, requestId }.
+      // For granular telegram/email tracking, extend the API response with
+      // { telegramOk: boolean, emailOk: boolean } and call conditionally.
+      // For now, a successful response implies both channels were attempted.
+      trackTelegramOk();
+      trackEmailOk();
     } catch (err) {
       clearTimeout(timeoutId);
       const msg = err instanceof Error ? err.message : String(err);
@@ -297,9 +305,15 @@ export function QuoteWizard() {
     setContactErrors({});
 
     if (step === TOTAL_STEPS) {
+      trackSubmitted();
       void handleSubmitQuote();
       return;
     }
+
+    // Track first real advance as "quote_started"; subsequent steps as step_N
+    if (step === 1) trackQuoteStarted();
+    else trackStep(step as 2 | 3 | 4 | 5);
+
     goNext();
   };
 

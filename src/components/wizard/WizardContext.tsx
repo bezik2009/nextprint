@@ -15,6 +15,7 @@ import {
   type WizardData,
   type WizardDraft,
 } from "./types";
+import { trackModalOpen } from "@/lib/tracking";
 
 /* ── Context shape ──────────────────────────────────────────────────────── */
 interface WizardContextValue {
@@ -135,6 +136,7 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
   const open = useCallback(() => {
     setSubmitted(false);
     setIsOpen(true);
+    trackModalOpen();
   }, []);
 
   const close = useCallback(() => {
