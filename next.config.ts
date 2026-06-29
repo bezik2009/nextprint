@@ -12,19 +12,19 @@ const isDev = process.env.NODE_ENV === "development";
 // Production omits it — eval is never needed in built output.
 const SCRIPT_SRC = isDev
   ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-  : "script-src 'self' 'unsafe-inline'";
+  : "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com";
 
 // In development, HMR requires WebSocket connections (ws:/wss:).
 // Production has no HMR, so 'self' only is sufficient.
 const CONNECT_SRC = isDev
   ? "connect-src 'self' ws: wss:"
-  : "connect-src 'self'";
+  : "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://www.googletagmanager.com";
 
 const CSP = [
   "default-src 'self'",
   SCRIPT_SRC,
   "style-src 'self' 'unsafe-inline'",    // Next.js critical CSS
-  "img-src 'self' data: blob:",           // Next.js Image (avif/webp), inline SVG data URIs
+  "img-src 'self' data: blob: https://www.google-analytics.com", // Next.js Image + GA pixel
   "font-src 'self' data:",               // self-hosted Manrope via next/font
   CONNECT_SRC,                           // 'self' in prod; adds ws:/wss: in dev for HMR
   "media-src 'none'",
@@ -104,34 +104,22 @@ const nextConfig: NextConfig = {
       },
     ];
 
-    // Cache-Control headers for production only.
-    // In development Next.js manages its own cache headers for /_next/static.
-    // Setting custom Cache-Control on /_next/static in dev breaks HMR and
-    // triggers a "Custom Cache-Control headers detected" warning.
-    const cacheHeaders = isDev
-      ? []
-      : [
+    // Next.js automatically sets immutable Cache-Control on /_next/static assets.
+    // Do NOT add a custom rule for /_next/static — it triggers a warning in both
+    // dev and production builds and provides no benefit.
+    // Only set Cache-Control for assets we own (/images, /fonts, etc.).
+    const cacheHeaders = [
+      {
+        // 30-day cache for public image assets
+        source: "/images/(.*)",
+        headers: [
           {
-            // Long-lived immutable cache for hashed Next.js static assets
-            source: "/_next/static/(.*)",
-            headers: [
-              {
-                key: "Cache-Control",
-                value: "public, max-age=31536000, immutable",
-              },
-            ],
+            key: "Cache-Control",
+            value: "public, max-age=2592000, stale-while-revalidate=86400",
           },
-          {
-            // 30-day cache for public image assets
-            source: "/images/(.*)",
-            headers: [
-              {
-                key: "Cache-Control",
-                value: "public, max-age=2592000, stale-while-revalidate=86400",
-              },
-            ],
-          },
-        ];
+        ],
+      },
+    ];
 
     return [...securityHeaders, ...cacheHeaders];
   },
