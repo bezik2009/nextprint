@@ -347,7 +347,150 @@ async function sendEmail(
   }
 }
 
-/* ── Telegram document sender (best-effort) ──────────────────────────────── */
+/* ── Customer confirmation email ─────────────────────────────────────────── */
+
+function buildCustomerEmailHtml(d: QuotePayload, requestId: string): string {
+  const sizeDisplay = d.step4_size
+    ? `${d.step4_size} мм`
+    : d.step4_sizePreset ? (SIZE_PRESET[d.step4_sizePreset] ?? "") : "";
+
+  const useCaseDisplay =
+    d.step5_useCase === "other" && d.step5_useCaseOther
+      ? `Інше — ${escHtml(d.step5_useCaseOther)}`
+      : escHtml(USE_CASE[d.step5_useCase] ?? d.step5_useCase);
+
+  const qtyDisplay  = d.step3_quantity ? `${escHtml(d.step3_quantity)} шт.` : "—";
+  const typeDisplay = escHtml(PRODUCTION_TYPE[d.step1_productionType] ?? d.step1_productionType);
+  const fmtDisplay  = escHtml(FILE_FORMAT[d.step2_fileFormat] ?? d.step2_fileFormat);
+  const deadDisplay = escHtml(DEADLINE_PLAIN[d.step7_deadline] ?? d.step7_deadline);
+
+  return `<!DOCTYPE html>
+<html lang="uk">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 16px;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;max-width:600px;width:100%;">
+
+  <tr><td style="background:#020B16;padding:24px 32px;">
+    <p style="margin:0;color:#F5C400;font-size:18px;font-weight:700;letter-spacing:.05em;">NEXTPRINT</p>
+    <p style="margin:6px 0 0;color:rgba(255,255,255,.55);font-size:13px;">Підтвердження заявки</p>
+  </td></tr>
+
+  <tr><td style="background:#F5C400;padding:10px 32px;">
+    <p style="margin:0;font-size:13px;font-weight:700;color:#020B16;letter-spacing:.08em;">ЗАЯВКА: ${escHtml(requestId)}</p>
+  </td></tr>
+
+  <tr><td style="padding:28px 32px;">
+    <p style="margin:0 0 16px;font-size:15px;color:#1a1a1a;">Доброго дня!</p>
+    <p style="margin:0 0 12px;font-size:14px;color:#444;line-height:1.6;">
+      Дякуємо за звернення до <strong>NextPrint</strong>.
+    </p>
+    <p style="margin:0 0 24px;font-size:14px;color:#444;line-height:1.6;">
+      Ми отримали вашу заявку <strong>№ ${escHtml(requestId)}</strong>.
+      Наш менеджер перегляне інформацію та звʼяжеться з вами найближчим часом.
+    </p>
+
+    <p style="margin:0 0 12px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#888;">Що буде далі</p>
+    <ol style="margin:0 0 24px;padding-left:20px;color:#444;font-size:14px;line-height:1.8;">
+      <li>Перевіримо модель або креслення, якщо ви його прикріпили.</li>
+      <li>За потреби поставимо уточнюючі питання.</li>
+      <li>Підберемо оптимальний матеріал.</li>
+      <li>Порахуємо вартість і строки.</li>
+      <li>Надішлемо вам відповідь.</li>
+    </ol>
+
+    <hr style="border:none;border-top:1px solid #eee;margin:0 0 20px;">
+    <p style="margin:0 0 12px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#888;">Коротко по вашій заявці</p>
+    <table cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;margin-bottom:24px;">
+      <tr>
+        <td style="padding:6px 12px 6px 0;color:#888;font-size:13px;width:40%;vertical-align:top;">Тип замовлення</td>
+        <td style="padding:6px 0;font-size:14px;color:#1a1a1a;">${typeDisplay}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 12px 6px 0;color:#888;font-size:13px;vertical-align:top;">Модель / файл</td>
+        <td style="padding:6px 0;font-size:14px;color:#1a1a1a;">${fmtDisplay}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 12px 6px 0;color:#888;font-size:13px;vertical-align:top;">Кількість</td>
+        <td style="padding:6px 0;font-size:14px;color:#1a1a1a;">${qtyDisplay}</td>
+      </tr>
+      ${useCaseDisplay ? `<tr>
+        <td style="padding:6px 12px 6px 0;color:#888;font-size:13px;vertical-align:top;">Призначення</td>
+        <td style="padding:6px 0;font-size:14px;color:#1a1a1a;">${useCaseDisplay}</td>
+      </tr>` : ""}
+      ${deadDisplay ? `<tr>
+        <td style="padding:6px 12px 6px 0;color:#888;font-size:13px;vertical-align:top;">Строки</td>
+        <td style="padding:6px 0;font-size:14px;color:#1a1a1a;">${deadDisplay}</td>
+      </tr>` : ""}
+      ${sizeDisplay ? `<tr>
+        <td style="padding:6px 12px 6px 0;color:#888;font-size:13px;vertical-align:top;">Розмір</td>
+        <td style="padding:6px 0;font-size:14px;color:#1a1a1a;">${escHtml(sizeDisplay)}</td>
+      </tr>` : ""}
+    </table>
+
+    <p style="margin:0 0 6px;font-size:14px;color:#444;line-height:1.6;">
+      Якщо потрібно щось додати або змінити — просто відповідайте на цей лист.
+    </p>
+    <p style="margin:0;font-size:14px;color:#444;">Дякуємо!</p>
+  </td></tr>
+
+  <tr><td style="background:#f9f9f9;padding:16px 32px;border-top:1px solid #eee;">
+    <p style="margin:0;font-size:13px;color:#1a1a1a;font-weight:600;">NextPrint</p>
+    <p style="margin:4px 0 0;font-size:12px;color:#aaa;">
+      <a href="https://www.nextprint.com.ua" style="color:#888;text-decoration:none;">nextprint.com.ua</a>
+    </p>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body></html>`;
+}
+
+/**
+ * Send confirmation email to the customer (no attachments).
+ * Fires only when contact.email is present.
+ * Returns true if Resend accepted the request.
+ */
+async function sendCustomerEmail(
+  d: QuotePayload,
+  requestId: string,
+): Promise<boolean> {
+  const customerEmail = d.step9_contact.email.trim();
+  if (!customerEmail) return false; // no email provided — skip silently
+
+  const apiKey  = process.env.RESEND_API_KEY;
+  const from    = process.env.QUOTE_FROM_EMAIL ?? "NextPrint <onboarding@resend.dev>";
+  const replyTo = process.env.QUOTE_NOTIFICATION_EMAIL; // owner email as reply-to
+
+  if (!apiKey) {
+    console.warn("[send-email-customer] RESEND_API_KEY not set — skipping customer email");
+    return false;
+  }
+
+  const body: Record<string, unknown> = {
+    from,
+    to:      customerEmail,
+    subject: `Дякуємо! Ми отримали вашу заявку — NextPrint`,
+    html:    buildCustomerEmailHtml(d, requestId),
+  };
+  if (replyTo) body.reply_to = replyTo;
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method:  "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+    body:    JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    // Log only the request ID and HTTP status — no email address
+    console.warn(`[send-email-customer] Resend HTTP ${res.status} for requestId ${requestId}`);
+    return false;
+  }
+
+  return true;
+}
 
 /**
  * Sends each uploaded file to the Telegram chat as a document.
@@ -499,14 +642,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ success:false, error:`Telegram error ${tgRes.status}` }, { status:502 });
   }
 
-  // ── 2+3. Telegram documents + Email (best-effort, awaited for Vercel) ───
-  // Must await before returning — Vercel serverless freezes after response,
-  // so fire-and-forget tasks would be silently dropped.
-  const bestEffortResults = await Promise.allSettled([
+  // ── 2+3+4. Telegram docs + Owner email + Customer confirmation (best-effort) ─
+  // All awaited before returning — Vercel serverless freezes after response.
+  const [tgDocsResult, ownerEmailResult, customerEmailResult] = await Promise.allSettled([
     sendTelegramDocuments(token, chatId, fileData, requestId),
     sendEmail(payload, fileData, requestId),
+    sendCustomerEmail(payload, requestId),
   ]);
-  for (const result of bestEffortResults) {
+
+  for (const result of [tgDocsResult, ownerEmailResult]) {
     if (result.status === "rejected") {
       console.error(
         "[send-telegram] Best-effort task failed:",
@@ -514,6 +658,22 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
   }
+  if (customerEmailResult.status === "rejected") {
+    console.warn(
+      "[send-email-customer] Task rejected for requestId:", requestId,
+      customerEmailResult.reason instanceof Error
+        ? customerEmailResult.reason.message
+        : customerEmailResult.reason,
+    );
+  }
 
-  return NextResponse.json({ success:true, requestId });
+  // Notifications summary — front-end ignores this if fields are missing
+  const notifications = {
+    telegram:      true, // main message succeeded (we'd have returned 502 otherwise)
+    ownerEmail:    ownerEmailResult.status === "fulfilled",
+    customerEmail: customerEmailResult.status === "fulfilled" &&
+                   customerEmailResult.value === true,
+  };
+
+  return NextResponse.json({ success: true, requestId, notifications });
 }
