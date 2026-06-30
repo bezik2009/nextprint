@@ -16,6 +16,8 @@ const BASE_URL = "https://www.nextprint.com.ua";
 
 // GA4 — only inject when the env var is set; never hardcode IDs in source
 const GA_ID         = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "";
+// Microsoft Clarity — only injected when CLARITY_ID is set
+const CLARITY_ID    = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID ?? "";
 // Google Search Console verification — add tag only when set
 const GSC_TOKEN     = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? "";
 
@@ -142,6 +144,19 @@ export default function RootLayout({
               `}
             </Script>
           </>
+        )}
+
+        {/* Microsoft Clarity — only injected when CLARITY_ID is set */}
+        {CLARITY_ID && (
+          <Script id="clarity-init" strategy="afterInteractive">
+            {`
+              (function(c,l,a,r,i,t,y){
+                  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "${CLARITY_ID}");
+            `}
+          </Script>
         )}
 
         <StructuredData />
