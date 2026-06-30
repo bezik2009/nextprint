@@ -15,6 +15,7 @@ import {
   type WizardData,
   type WizardDraft,
 } from "./types";
+import { trackAbandon } from "@/lib/analytics";
 
 /* ── Context shape ──────────────────────────────────────────────────────── */
 interface WizardContextValue {
@@ -83,6 +84,10 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
 
   // Restore saved scroll position on close
   const scrollYRef = useRef(0);
+  /** Timestamp when the wizard was opened — used to compute abandon duration */
+  const sessionOpenedAtRef = useRef<number | null>(null);
+  /** Guards against firing quote_abandon more than once per session */
+  const abandonFiredRef = useRef(false);
 
   /* Draft restore on mount */
   useEffect(() => {
@@ -131,6 +136,25 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   });
+
+  /* Track session open time + fire quote_abandon exactly once on close-without-submit */
+  useEffect(() => {
+    if (isOpen) {
+      if (sessionOpenedAtRef.current === null) {
+        sessionOpenedAtRef.current = Date.now();
+      }
+      abandonFiredRef.current = false; // reset guard for the new session
+      return;
+    }
+
+    // Wizard just closed
+    if (!submitted && !abandonFiredRef.current && sessionOpenedAtRef.current !== null) {
+      const timeSpentSeconds = (Date.now() - sessionOpenedAtRef.current) / 1000;
+      trackAbandon({ lastStep: step, timeSpentSeconds });
+      abandonFiredRef.current = true;
+    }
+    sessionOpenedAtRef.current = null;
+  }, [isOpen, submitted, step]);
 
   const open = useCallback(() => {
     setSubmitted(false);

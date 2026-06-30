@@ -66,7 +66,7 @@ function SuccessScreen({ onClose, onReset }: { onClose: () => void; onReset: () 
       </div>
       <h3 className="wz-success-title">🎉 Дякуємо!</h3>
       <p className="wz-success-body">
-        Вашу заявку успішно отримано. Наш інженер вже почав її опрацьовувати.
+        Вашу заявку успішно отримано. Наш менеджер вже почав її опрацьовувати.
       </p>
       <p className="wz-success-body" style={{ marginTop: 8 }}>
         Якщо ви прикріпили модель — ми попередньо її переглянемо ще до дзвінка.
@@ -93,12 +93,13 @@ import {
   trackStepView,
   trackStepCompleted,
   trackSubmitClick,
-  trackSubmitSuccess,
+  trackSubmit,
   trackSubmitError,
-  trackGenerateLead,
-  trackTelegramOk,
-  trackEmailOk,
-} from "@/lib/tracking";
+  trackLead,
+  trackTelegramSuccess,
+  trackEmailSuccess,
+  stepNameFor,
+} from "@/lib/analytics";
 
 function validateStep(
   step: number,
@@ -173,6 +174,26 @@ export function QuoteWizard() {
   const honeypotRef = useRef<HTMLInputElement>(null);
   /** Real File objects — never persisted to localStorage, lives only in memory */
   const fileStore   = useRef<File[]>([]);
+  /** Timestamp of when the wizard was first opened in this session — for duration tracking */
+  const openedAtRef     = useRef<number | null>(null);
+  /** Highest step number reached this session — for steps_completed tracking */
+  const maxStepReached  = useRef(1);
+
+  /* Record open time once per session (reset when wizard closes without submitting) */
+  useEffect(() => {
+    if (isOpen && openedAtRef.current === null) {
+      openedAtRef.current = Date.now();
+    }
+    if (!isOpen) {
+      openedAtRef.current = null;
+      maxStepReached.current = 1;
+    }
+  }, [isOpen]);
+
+  /* Track the deepest step reached this session */
+  useEffect(() => {
+    if (step > maxStepReached.current) maxStepReached.current = step;
+  }, [step]);
 
   /* Focus trap */
   useEffect(() => {
@@ -205,7 +226,9 @@ export function QuoteWizard() {
 
   /* Track step view — fires once per step change, not on re-render */
   useEffect(() => {
-    if (isOpen && !submitted) trackStepView(step);
+    if (isOpen && !submitted) {
+      trackStepView({ stepNumber: step, stepName: stepNameFor(step) });
+    }
   }, [step, isOpen, submitted]);
 
   if (!isOpen) return null;
@@ -287,17 +310,46 @@ export function QuoteWizard() {
       fileStore.current = [];
       setSubmitted(true);
 
-      // Granular success tracking
+      // ── Granular success tracking ──────────────────────────────────────
       const fileCount = data.step8_files.length;
-      trackSubmitSuccess({
+      const durationSeconds = openedAtRef.current
+        ? (Date.now() - openedAtRef.current) / 1000
+        : 0;
+
+      trackSubmit({
         requestIdPresent: !!("requestId" in json),
         hasFile:          fileCount > 0,
         fileCount,
+        durationSeconds,
+        stepsCompleted:   maxStepReached.current,
       });
-      trackGenerateLead();
-      // Legacy channel events (both channels attempted on success)
-      trackTelegramOk();
-      trackEmailOk();
+
+      // generate_lead — enriched, non-personal snapshot of the order
+      const quantityNum = Number(data.step3_quantity) || 0;
+      const quantityBucket =
+        quantityNum <= 0    ? "unknown"
+        : quantityNum === 1 ? "1"
+        : quantityNum <= 10 ? "1-10"
+        : quantityNum <= 50 ? "10-50"
+        : quantityNum <= 100 ? "50-100"
+        : quantityNum <= 500 ? "100-500"
+        : "500+";
+
+      const fileTypeForLead = fileCount === 0 ? "none" : (data.step2_fileFormat || "unknown");
+
+      trackLead({
+        orderType:      data.step1_productionType || "unknown",
+        fileType:        fileTypeForLead,
+        quantityBucket,
+        urgency:         data.step7_deadline || "unknown",
+        purpose:         data.step5_useCase || "unknown",
+        hasComment:      data.step9_contact.comment.trim().length > 0,
+        hasAttachment:   fileCount > 0,
+      });
+
+      // Channel delivery confirmation (both attempted on a successful response)
+      trackTelegramSuccess();
+      trackEmailSuccess();
     } catch (err) {
       clearTimeout(timeoutId);
       const msg = err instanceof Error ? err.message : String(err);
@@ -347,12 +399,12 @@ export function QuoteWizard() {
 
     // Track step completed (fires before goNext so step number is still current)
     if (step === 1) trackQuoteStarted();
-    trackStepCompleted(step);
+    trackStepCompleted({ stepNumber: step, stepName: stepNameFor(step) });
 
     goNext();
   };
 
-  // Enter key on Step 9 text inputs (not textarea) advances the wizard
+  // Enter key on Step 4 text inputs (not textarea) advances the wizard
   const handleStep4KeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
       e.preventDefault();
@@ -368,7 +420,7 @@ export function QuoteWizard() {
   const isPreviewStep = step === TOTAL_STEPS;
   const { valid: canProceed } = validateStep(step, data);
 
-  // Step 10 safety: re-validate contacts in case of a stale localStorage draft
+  // Final step safety: re-validate contacts in case of a stale localStorage draft
   const { valid: contactsValid } = step === TOTAL_STEPS
     ? validateStep(4, data)
     : { valid: true };
