@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { formatPhoneForDisplay, validatePhone } from "./validation";
+import { trackFileAttached, trackFileRemoved } from "@/lib/tracking";
 import type {
   ContactErrors,
   Deadline,
@@ -152,6 +153,10 @@ export function Step2({
       : "stl";
     update({ step8_files: metadata, step2_fileFormat: fmt as WizardData["step2_fileFormat"] });
     onFilesChange?.(fileObjs.current);
+    // Track after first file batch added
+    if (fileObjs.current.length === newFiles.length) {
+      trackFileAttached(fileObjs.current.map((f) => ({ name: f.name, size: f.size, type: f.type })));
+    }
     // Auto-advance after first file is added
     if (fileObjs.current.length === newFiles.length) {
       setTimeout(() => onAutoAdvance?.(), 400);
@@ -162,6 +167,7 @@ export function Step2({
     fileObjs.current = fileObjs.current.filter((_, i) => i !== idx);
     update({ step8_files: data.step8_files.filter((_, i) => i !== idx) });
     onFilesChange?.(fileObjs.current);
+    trackFileRemoved(fileObjs.current.length);
   };
 
   return (

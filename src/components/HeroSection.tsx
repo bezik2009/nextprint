@@ -142,12 +142,18 @@ const STATS = [
 ];
 
 import { useWizard } from "@/components/wizard";
+import { trackMainCtaClick, trackModalOpen } from "@/lib/tracking";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    HeroSection
 ═══════════════════════════════════════════════════════════════════════════ */
 export function HeroSection() {
   const { open } = useWizard();
+  const handleHeroCta = () => {
+    trackMainCtaClick("hero");
+    trackModalOpen("cta");
+    open();
+  };
 
   return (
     <section id="hero" className="nh-section" aria-label="Головний екран">
@@ -193,7 +199,7 @@ export function HeroSection() {
         {/* CTA — left col on desktop, just below image on mobile */}
         <button
           type="button"
-          onClick={open}
+          onClick={handleHeroCta}
           className="nh-cta"
           aria-label="Отримати розрахунок — відкрити форму"
         >

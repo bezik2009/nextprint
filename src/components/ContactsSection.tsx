@@ -167,7 +167,7 @@ export function ContactsSection() {
 
         {/* Primary CTA — opens Quote Wizard */}
         <div className="nc-wizard-cta">
-          <WizardCTA className="nc-wizard-btn">
+          <WizardCTA className="nc-wizard-btn" location="contacts">
             Отримати розрахунок →
           </WizardCTA>
         </div>

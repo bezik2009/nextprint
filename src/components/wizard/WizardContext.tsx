@@ -15,7 +15,6 @@ import {
   type WizardData,
   type WizardDraft,
 } from "./types";
-import { trackModalOpen } from "@/lib/tracking";
 
 /* ── Context shape ──────────────────────────────────────────────────────── */
 interface WizardContextValue {
@@ -136,7 +135,8 @@ export function WizardProvider({ children }: { children: React.ReactNode }) {
   const open = useCallback(() => {
     setSubmitted(false);
     setIsOpen(true);
-    trackModalOpen();
+    // note: quote_modal_open is tracked by each CTA button (WizardCTA / HeroSection)
+    // so it can carry a location param. Do not re-fire here.
   }, []);
 
   const close = useCallback(() => {

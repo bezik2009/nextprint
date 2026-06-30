@@ -275,7 +275,7 @@ export function CapabilitiesSection() {
           <HexIcon size={44}><IconConsult /></HexIcon>
           <p className="np-cap-cta-text">Потрібна консультація або розрахунок?</p>
         </div>
-        <WizardCTA className="np-cap-cta-btn">
+        <WizardCTA className="np-cap-cta-btn" location="capabilities">
           Звʼязатися з нами →
         </WizardCTA>
       </div>

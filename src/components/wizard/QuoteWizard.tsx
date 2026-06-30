@@ -88,7 +88,17 @@ function SuccessScreen({ onClose, onReset }: { onClose: () => void; onReset: () 
 
 import { validateEmail, validatePhone } from "./validation";
 import type { ContactErrors } from "./types";
-import { trackQuoteStarted, trackStep, trackSubmitted, trackTelegramOk, trackEmailOk } from "@/lib/tracking";
+import {
+  trackQuoteStarted,
+  trackStepView,
+  trackStepCompleted,
+  trackSubmitClick,
+  trackSubmitSuccess,
+  trackSubmitError,
+  trackGenerateLead,
+  trackTelegramOk,
+  trackEmailOk,
+} from "@/lib/tracking";
 
 function validateStep(
   step: number,
@@ -193,6 +203,11 @@ export function QuoteWizard() {
   /* Reset validation highlight on step change */
   useEffect(() => { setShowValidation(false); }, [step]);
 
+  /* Track step view — fires once per step change, not on re-render */
+  useEffect(() => {
+    if (isOpen && !submitted) trackStepView(step);
+  }, [step, isOpen, submitted]);
+
   if (!isOpen) return null;
 
   /** Normalise contact fields (trim, lowercase email) before advancing */
@@ -216,7 +231,7 @@ export function QuoteWizard() {
     if (!contactsOk) {
       setShowValidation(true);
       if (errs) setContactErrors(errs);
-      setStep(9);
+      setStep(4);
       return;
     }
 
@@ -272,16 +287,30 @@ export function QuoteWizard() {
       fileStore.current = [];
       setSubmitted(true);
 
-      // TODO: API currently returns only { success, requestId }.
-      // For granular telegram/email tracking, extend the API response with
-      // { telegramOk: boolean, emailOk: boolean } and call conditionally.
-      // For now, a successful response implies both channels were attempted.
+      // Granular success tracking
+      const fileCount = data.step8_files.length;
+      trackSubmitSuccess({
+        requestIdPresent: !!("requestId" in json),
+        hasFile:          fileCount > 0,
+        fileCount,
+      });
+      trackGenerateLead();
+      // Legacy channel events (both channels attempted on success)
       trackTelegramOk();
       trackEmailOk();
     } catch (err) {
       clearTimeout(timeoutId);
       const msg = err instanceof Error ? err.message : String(err);
       console.error("[QuoteWizard] Submit failed:", msg);
+
+      // Classify error type for tracking — no personal data
+      const errorType =
+        msg === "rate-limited"         ? "server"
+        : err instanceof Error && err.name === "AbortError" ? "timeout"
+        : msg.startsWith("HTTP")       ? "server"
+        : "network";
+      trackSubmitError(errorType, step);
+
       setSubmitError(
         msg === "rate-limited"
           ? "Забагато заявок за короткий час. Спробуйте трохи пізніше або напишіть нам на office@nextprint.com.ua"
@@ -293,7 +322,7 @@ export function QuoteWizard() {
   };
 
   const handleNext = () => {
-    // Normalise contacts before validation when leaving step 9
+    // Normalise contacts before validation when leaving step 4
     if (step === 4) normaliseContacts();
 
     const { valid, contactErrors: errs } = validateStep(step, data);
@@ -305,14 +334,20 @@ export function QuoteWizard() {
     setContactErrors({});
 
     if (step === TOTAL_STEPS) {
-      trackSubmitted();
+      // Track submit click with safe params before calling API
+      trackSubmitClick({
+        hasFile:        data.step8_files.length > 0,
+        fileCount:      data.step8_files.length,
+        productionType: data.step1_productionType,
+        deadline:       data.step7_deadline,
+      });
       void handleSubmitQuote();
       return;
     }
 
-    // Track first real advance as "quote_started"; subsequent steps as step_N
+    // Track step completed (fires before goNext so step number is still current)
     if (step === 1) trackQuoteStarted();
-    else trackStep(step as 2 | 3 | 4 | 5);
+    trackStepCompleted(step);
 
     goNext();
   };
