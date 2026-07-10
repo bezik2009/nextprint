@@ -104,11 +104,11 @@ function IconConsult() {
 
 /* ── Data ───────────────────────────────────────────────────────────────── */
 const PROCESS_STEPS = [
-  { n: "01", title: "ВИ НАДАЄТЕ МОДЕЛЬ",       desc: "Надішліть 3D-модель та технічні вимоги.", Icon: IconUpload   },
-  { n: "02", title: "АНАЛІЗ ТА ПІДГОТОВКА",    desc: "Оцінюємо модель, підбираємо матеріал та оптимізуємо друк.", Icon: IconAnalysis },
-  { n: "03", title: "3D-ДРУК",                  desc: "Друкуємо деталі на Bambu Lab P1S у виробничій фермі.", Icon: IconPrint3D  },
-  { n: "04", title: "КОНТРОЛЬ ЯКОСТІ",          desc: "Перевіряємо розміри, геометрію та зовнішній вигляд.", Icon: IconCheck    },
-  { n: "05", title: "ПАКУВАННЯ ТА ДОСТАВКА",   desc: "Надійно пакуємо та відправляємо замовлення.", Icon: IconBox      },
+  { n: "01", title: "ВИ НАДАЄТЕ МОДЕЛЬ",          desc: "Надішліть STL, STEP або 3MF. Або креслення, якщо моделі ще немає.", Icon: IconUpload   },
+  { n: "02", title: "ІНЖЕНЕРНИЙ АНАЛІЗ",           desc: "Оцінюємо конструкцію, підбираємо матеріал та оптимізуємо виробничий процес.", Icon: IconAnalysis },
+  { n: "03", title: "ВИРОБНИЦТВО",                 desc: "Виготовляємо деталі на виробничій лінії. Контролюємо повторюваність.", Icon: IconPrint3D  },
+  { n: "04", title: "КОНТРОЛЬ ЯКОСТІ",             desc: "Перевіряємо розміри, геометрію та зовнішній вигляд.", Icon: IconCheck    },
+  { n: "05", title: "КОНТРОЛЬ ТА ВІДВАНТАЖЕННЯ",   desc: "Надійно пакуємо та відправляємо замовлення.", Icon: IconBox      },
 ];
 
 const STATS = [
@@ -119,12 +119,12 @@ const STATS = [
 ];
 
 const MATERIALS = [
-  { name: "PETG",    desc: "Функціональні деталі, корпуси, кріплення" },
-  { name: "PLA",     desc: "Прототипи, декоративні деталі"            },
-  { name: "TPU",     desc: "Гнучкі деталі, ущільнення, амортизатори"  },
-  { name: "ABS",     desc: "Міцні деталі, стійкі до навантажень"      },
-  { name: "ELASTAN", desc: "Висока еластичність, зносостійкість"      },
-  { name: "PLA-LW",  desc: "Легкі деталі, зменшена вага"              },
+  { name: "PETG",    desc: "Функціональні корпуси, кріплення, інженерні компоненти" },
+  { name: "PLA",     desc: "Прототипи для швидкої перевірки конструкції"            },
+  { name: "TPU",     desc: "Гнучкі деталі, ущільнення, демпфери"                   },
+  { name: "ABS",     desc: "Ударостійкі деталі, стійкі до навантажень"             },
+  { name: "ELASTAN", desc: "Висока еластичність, зносостійкість"                   },
+  { name: "PLA-LW",  desc: "Легкі конструкційні деталі зі зменшеною вагою"         },
 ];
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -146,13 +146,13 @@ export function CapabilitiesSection() {
           </div>
 
           <h2 className="np-cap-heading">
-            <span className="np-cap-heading-white">Від 3D-моделі<br />до готових деталей —<br /></span>
-            <span className="np-cap-heading-yellow">Повний цикл</span>
+            <span className="np-cap-heading-white">Від технічного завдання<br />до готових компонентів —<br /></span>
+            <span className="np-cap-heading-yellow">Повний виробничий цикл</span>
           </h2>
 
           <p className="np-cap-body">
-            Ми беремо на себе весь процес: від підготовки моделі до серійного
-            виробництва та доставки готових деталей.
+            Беремо на себе весь процес: від інженерного аналізу конструкції до серійного
+            виготовлення та доставки готових деталей.
           </p>
 
           <ul className="np-cap-bullets">
@@ -160,21 +160,21 @@ export function CapabilitiesSection() {
               <HexIcon size={44}><IconQuality /></HexIcon>
               <div>
                 <p className="np-cap-bullet-title">Контроль якості</p>
-                <p className="np-cap-bullet-desc">Багаторівневий контроль на кожному етапі виробництва.</p>
+                <p className="np-cap-bullet-desc">Перевірка на кожному етапі виробничого циклу.</p>
               </div>
             </li>
             <li className="np-cap-bullet">
               <HexIcon size={44}><IconSpeed /></HexIcon>
               <div>
-                <p className="np-cap-bullet-title">Швидкі терміни</p>
-                <p className="np-cap-bullet-desc">Оптимізовані процеси для швидкого виконання замовлень.</p>
+                <p className="np-cap-bullet-title">Стислі строки</p>
+                <p className="np-cap-bullet-desc">Оптимізований виробничий процес для своєчасних поставок.</p>
               </div>
             </li>
             <li className="np-cap-bullet">
               <HexIcon size={44}><IconDelivery /></HexIcon>
               <div>
-                <p className="np-cap-bullet-title">Доставка по Україні</p>
-                <p className="np-cap-bullet-desc">Надійне пакування та швидка доставка до вашого виробництва.</p>
+                <p className="np-cap-bullet-title">Доставка до виробництва</p>
+                <p className="np-cap-bullet-desc">Надійне пакування та відправлення по всій Україні.</p>
               </div>
             </li>
           </ul>
@@ -216,7 +216,7 @@ export function CapabilitiesSection() {
         {/* LEFT CARD: equipment */}
         <div className="np-cap-equip-card">
           <p className="np-cap-card-title">Наше обладнання</p>
-          <p className="np-cap-card-sub">Промислова ферма на базі Bambu Lab P1S / P1S Combo</p>
+          <p className="np-cap-card-sub">Виробнича лінія на базі Bambu Lab P1S / P1S Combo</p>
 
           <div className="np-cap-stats-row">
             {STATS.map((s) => (
@@ -245,7 +245,7 @@ export function CapabilitiesSection() {
         {/* RIGHT CARD: materials */}
         <div className="np-cap-mat-card">
           <p className="np-cap-card-title">Матеріали</p>
-          <p className="np-cap-card-sub">Працюємо з інженерними пластиками для різних задач</p>
+          <p className="np-cap-card-sub">Підбираємо матеріал під механічні та теплові вимоги виробу</p>
 
           <div className="np-cap-mat-grid">
             {MATERIALS.map((m) => (
@@ -273,7 +273,7 @@ export function CapabilitiesSection() {
       <div className="np-cap-cta">
         <div className="np-cap-cta-left">
           <HexIcon size={44}><IconConsult /></HexIcon>
-          <p className="np-cap-cta-text">Потрібна консультація або розрахунок?</p>
+          <p className="np-cap-cta-text">Маєте виробниче завдання? Обговоримо деталі.</p>
         </div>
         <WizardCTA className="np-cap-cta-btn" location="capabilities">
           Звʼязатися з нами →

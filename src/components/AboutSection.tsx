@@ -151,18 +151,19 @@ export function AboutSection() {
           </div>
 
           <h2 className="np-about-heading">
-            <span className="np-about-heading-white">Виробнича ферма 3D-друку<br /></span>
-            <span className="np-about-heading-yellow">для серійних задач</span>
+            <span className="np-about-heading-white">Контрактне виробництво<br /></span>
+            <span className="np-about-heading-yellow">пластикових компонентів</span>
           </h2>
 
           <p className="np-about-body">
-            NextPrint допомагає технологічним компаніям, виробникам та інженерним
-            командам швидко переходити від прототипу до стабільного серійного
-            виробництва пластикових компонентів.
+            NextPrint — виробничий партнер для компаній, яким потрібні пластикові
+            деталі: від одиничних зразків до регулярних виробничих партій.
           </p>
           <p className="np-about-body np-about-body--last">
-            Ми працюємо з малими та середніми партіями, контролюємо повторюваність
-            якості та можемо масштабувати виробництво під регулярні замовлення.
+            Ми спеціалізуємося на виготовленні функціональних пластикових компонентів
+            з інженерних матеріалів. Наше обладнання забезпечує стабільну якість від
+            першого виробу до тисячного без зупинки виробничого циклу. Беремо на себе
+            весь процес — від аналізу конструкції до відвантаження готових деталей.
           </p>
 
           <div className="np-about-printers">
@@ -188,32 +189,32 @@ export function AboutSection() {
             <li className="np-about-feature-row">
               <HexIcon><IconCube /></HexIcon>
               <div className="np-about-feature-text">
-                <p className="np-about-feature-row-title">Серійний FDM-друк</p>
-                <p className="np-about-feature-row-desc">Партії деталей для регулярних виробничих потреб</p>
+                <p className="np-about-feature-row-title">Серійне виробництво компонентів</p>
+                <p className="np-about-feature-row-desc">Виготовлення пластикових деталей від 1 до 10 000 шт.</p>
               </div>
             </li>
 
             <li className="np-about-feature-row">
               <HexIcon><IconTarget /></HexIcon>
               <div className="np-about-feature-text">
-                <p className="np-about-feature-row-title">Повторюваність</p>
-                <p className="np-about-feature-row-desc">Стабільні параметри друку та контроль якості</p>
+                <p className="np-about-feature-row-title">Повторюваність якості</p>
+                <p className="np-about-feature-row-desc">Стабільні параметри виробництва та контроль на кожній партії</p>
               </div>
             </li>
 
             <li className="np-about-feature-row">
               <HexIcon><IconGrowth /></HexIcon>
               <div className="np-about-feature-text">
-                <p className="np-about-feature-row-title">Масштабування</p>
-                <p className="np-about-feature-row-desc">Можливість збільшення обсягу під замовлення</p>
+                <p className="np-about-feature-row-title">Масштабування виробництва</p>
+                <p className="np-about-feature-row-desc">Збільшення обсягу без зміни виробничого партнера</p>
               </div>
             </li>
 
             <li className="np-about-feature-row">
               <HexIcon><IconBattery /></HexIcon>
               <div className="np-about-feature-text">
-                <p className="np-about-feature-row-title">Резервне живлення</p>
-                <p className="np-about-feature-row-desc">Безперервність роботи під час відключень</p>
+                <p className="np-about-feature-row-title">Безперервність циклу</p>
+                <p className="np-about-feature-row-desc">Резервне живлення — виробництво не зупиняється</p>
               </div>
             </li>
 
@@ -228,7 +229,7 @@ export function AboutSection() {
           <HexIcon size={48}><IconFactory /></HexIcon>
           <div className="np-audience-text">
             <p className="np-audience-title">Для виробників</p>
-            <p className="np-audience-desc">Деталі, кріплення, корпуси та функціональні пластикові компоненти.</p>
+            <p className="np-audience-desc">Корпуси, кріплення, функціональні деталі та компоненти серійного виготовлення.</p>
           </div>
         </div>
 
@@ -236,7 +237,7 @@ export function AboutSection() {
           <HexIcon size={48}><IconEngineering /></HexIcon>
           <div className="np-audience-text">
             <p className="np-audience-title">Для інженерних команд</p>
-            <p className="np-audience-desc">Швидке тестування конструкцій і перехід до малих серій.</p>
+            <p className="np-audience-desc">Швидке прототипування та перехід до малосерійного виробництва.</p>
           </div>
         </div>
 
@@ -244,7 +245,7 @@ export function AboutSection() {
           <HexIcon size={48}><IconPartnership /></HexIcon>
           <div className="np-audience-text">
             <p className="np-audience-title">Для технологічних компаній</p>
-            <p className="np-audience-desc">Партнерство для регулярного виготовлення пластикових виробів.</p>
+            <p className="np-audience-desc">Зовнішній виробничий підрозділ для регулярного виготовлення пластикових компонентів.</p>
           </div>
         </div>
 

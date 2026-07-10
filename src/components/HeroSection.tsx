@@ -135,7 +135,7 @@ const ADVANTAGES = [
 ];
 
 const STATS = [
-  { Icon: IconPrinter, value: "15+",             unit: "",   label: "3D принтерів", sub: "Bambu Lab P1S" },
+  { Icon: IconPrinter, value: "15+",             unit: "",   label: "Виробничих модулів", sub: "Bambu Lab P1S" },
   { Icon: IconCube,    value: "1000+",            unit: "",   label: "деталей щодня", sub: "" },
   { Icon: IconRuler,   value: "до 256×256×256",   unit: " мм",label: "максимальний розмір деталі", sub: "" },
   { Icon: IconTarget,  value: "±0.1",             unit: " мм",label: "точність друку", sub: "" },
@@ -167,19 +167,19 @@ export function HeroSection() {
             <svg width="18" height="10" viewBox="0 0 18 10" fill="none" aria-hidden="true" className="nh-label-arrow">
               <path d="M1 5H15M15 5L11 1M15 5L11 9" stroke="#F5C400" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <span className="nh-label">Професійний FDM 3D Друк</span>
+            <span className="nh-label">Контрактне виробництво пластикових деталей</span>
           </div>
 
           <h1 className="nh-headline">
-            Малосерійне<br />
-            виробництво<br />
-            пластикових деталей
+            Виробничий партнер<br />
+            для серійного виготовлення<br />
+            пластикових компонентів
           </h1>
 
           <p className="nh-sub">
-            Від прототипу до серії. Швидко, точно, надійно.<br />
-            Сучасне обладнання та інженерні матеріали<br />
-            для ваших ідей та виробництва.
+            Від першого зразка до контрактного виробництва.<br />
+            Допомагаємо компаніям запускати нові вироби<br />
+            і масштабувати виробництво без власного обладнання.
           </p>
         </div>
 
