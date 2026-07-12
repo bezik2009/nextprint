@@ -26,9 +26,9 @@ export function StructuredData() {
     url: BASE_URL,
     email: "office@nextprint.com.ua",
     logo: `${BASE_URL}/logo.png`,
-    image: `${BASE_URL}/og-image.png`,
+    image: `${BASE_URL}/og-image-v2.png`,
     description:
-      "Малосерійне виробництво пластикових деталей методом FDM 3D друку в Україні.",
+      "Виробничий партнер для серійного виробництва пластикових компонентів. Від прототипу до регулярних виробничих партій. Інженерні матеріали, контроль якості та швидкий запуск виробництва.",
     areaServed: {
       "@type": "Country",
       name: "Ukraine",
@@ -42,17 +42,18 @@ export function StructuredData() {
     "@type": "ProfessionalService",
     name: "NextPrint",
     url: BASE_URL,
-    image: `${BASE_URL}/og-image.png`,
+    image: `${BASE_URL}/og-image-v2.png`,
     description:
-      "Виробництво пластикових деталей від прототипу до малих серій на сучасному FDM 3D обладнанні.",
+      "Виробничий партнер для серійного виробництва пластикових компонентів. Від прототипу до регулярних виробничих партій. Інженерні матеріали, контроль якості та швидкий запуск виробництва.",
     areaServed: {
       "@type": "Country",
       name: "Ukraine",
     },
     serviceType: [
-      "FDM 3D друк",
+      "Контрактне виробництво",
+      "Серійне виробництво пластикових компонентів",
       "Прототипування",
-      "Малосерійне виробництво пластикових деталей",
+      "FDM 3D друк",
     ],
     // No street address is published — omit rather than fabricate one.
     sameAs: [],
@@ -64,7 +65,7 @@ export function StructuredData() {
     name: "NextPrint",
     url: BASE_URL,
     description:
-      "Малосерійне виробництво пластикових деталей методом FDM 3D-друку. Прототипування, інженерні матеріали, швидке виготовлення та доставка по всій Україні.",
+      "Виробничий партнер для серійного виробництва пластикових компонентів. Від прототипу до регулярних виробничих партій. Інженерні матеріали, контроль якості та швидкий запуск виробництва.",
     inLanguage: "uk-UA",
     publisher: {
       "@type": "Organization",
@@ -76,7 +77,7 @@ export function StructuredData() {
   const service = {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: "FDM 3D друк пластикових деталей",
+    name: "Контрактне виробництво пластикових компонентів",
     provider: {
       "@type": "Organization",
       name: "NextPrint",
@@ -87,10 +88,10 @@ export function StructuredData() {
       name: "Ukraine",
     },
     serviceType: [
+      "Контрактне виробництво",
+      "Серійне виробництво пластикових компонентів",
       "Прототипування",
-      "Малосерійне виробництво",
-      "Регулярне виробництво пластикових деталей",
-      "Друк інженерними матеріалами",
+      "FDM 3D друк",
     ],
     description:
       "Послуги FDM 3D друку для прототипів, корпусів електроніки, функціональних деталей, малих серій та регулярного виробництва.",
